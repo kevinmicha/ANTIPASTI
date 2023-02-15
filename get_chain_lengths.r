@@ -11,13 +11,18 @@ pdb <- read.pdb(args[1])
 getChainLenghts <- function(pdb) {
     pos_heavy <- 1
     pos_light <- sum(lengths(pdb$atom$chain))
+    hchain <- pdb$atom$chain[pos_heavy]
+    lchain <- pdb$atom$chain[pos_light]
 
-    ca.h <- atom.select(pdb, "calpha", chain=pdb$atom$chain[pos_heavy])
+    ca.h <- atom.select(pdb, "calpha", chain=hchain)
     hnum <- sum(lengths(ca.h$atom))
 
-    ca.l <- atom.select(pdb, "calpha", chain=pdb$atom$chain[pos_light])
+    if (hchain != lchain) {
+    ca.l <- atom.select(pdb, "calpha", chain=lchain)
     lnum <- sum(lengths(ca.l$atom))
-
+    } else {
+        lnum <- 0
+    }
     return(list(hnum, lnum))
 
 }
