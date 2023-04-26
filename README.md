@@ -1,7 +1,8 @@
 # Predicting and explaining antibody binding affinity with Deep Learning and Normal Mode Analysis
 
-[![Python 3.8](https://img.shields.io/badge/python-3.8-blue.svg)](https://www.python.org/downloads/release/python-380/)
+[![Python 3.8 3.9 3.10](https://img.shields.io/badge/python-3.8%20%7C%203.9%20%7C%203.10-blue)](https://www.python.org/downloads/release/python-3100/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green)](https://opensource.org/license/mit/)
+[![Tests](https://github.com/kevinmicha/predicting-affinity/actions/workflows/tests.yml/badge.svg)](https://github.com/kevinmicha/predicting-affinity/actions/workflows/tests.yml)
 
 NMA-CNN is a Python Deep Learning method that predicts the binding affinity of antibodies from their sequence and three-dimensional structure.
 
