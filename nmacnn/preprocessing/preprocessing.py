@@ -157,7 +157,7 @@ class Preprocessing(object):
             else:
                 pathologic = False
                 
-            # Obtaining the CDR1 to CDR3 lines for both chains
+            # Obtaining the CDR1 to CDR3 lines for the heavy chain first
             for i, line in enumerate(content[header_lines:]):
                 if line[chain_range].find(h_chain) != -1 and int(line[res_range]) in h_range:
                     if line[res_extra_letter] == ' ' or keepABC == True:
@@ -233,15 +233,13 @@ class Preprocessing(object):
         light = []
 
         for entry in selected_entries:
-            file_name = entry + self.selection
-            path = self.structures_path + file_name + self.file_type_input
-            self.generate_cdr1_to_cdr3_pdb(self.structures_path+entry+self.file_type_input, keepABC=True, lresidues=True)
-            output_string = subprocess.check_output(['/usr/local/bin/RScript '+str(self.scripts_path)+'get_chain_lengths.r '+str(path)], shell=True)
+            list_of_residues = np.load(self.residues_path+entry+'.npy')[1:-1]
+            h_chain = list_of_residues[0][0]
+            l_chain = list_of_residues[-1][0]
 
-            if os.path.exists(path):
-                os.remove(path)
-            h, l = extract_script_result(output_string)
-        
+            heavy.append(len([idx for idx in list_of_residues if idx[0] == h_chain]))
+            light.append(len([idx for idx in list_of_residues if idx[0] == l_chain]))
+
             heavy.append(h)
             light.append(l)
         
