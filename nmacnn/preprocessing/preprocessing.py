@@ -239,9 +239,6 @@ class Preprocessing(object):
 
             heavy.append(len([idx for idx in list_of_residues if idx[0] == h_chain]))
             light.append(len([idx for idx in list_of_residues if idx[0] == l_chain]))
-
-            heavy.append(h)
-            light.append(l)
         
         np.save(self.chain_lengths_path+'heavy_lengths.npy', heavy)
         np.save(self.chain_lengths_path+'light_lengths.npy', light)
