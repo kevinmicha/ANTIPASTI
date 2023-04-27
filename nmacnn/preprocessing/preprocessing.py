@@ -236,7 +236,7 @@ class Preprocessing(object):
             file_name = entry + self.selection
             path = self.structures_path + file_name + self.file_type_input
             self.generate_cdr1_to_cdr3_pdb(self.structures_path+entry+self.file_type_input, keepABC=True, lresidues=True)
-            subprocess.call(['/usr/local/bin/RScript'+str(self.scripts_path)+'get_chain_lengths.r '+str(path)], shell=True, stdout=open(os.devnull, 'wb'))
+            subprocess.call(['/usr/local/bin/RScript '+str(self.scripts_path)+'get_chain_lengths.r '+str(path)], shell=True, stdout=open(os.devnull, 'wb'))
            
             if os.path.exists(path):
                 os.remove(path)
@@ -297,11 +297,12 @@ class Preprocessing(object):
 
         """
 
+        if renew_maps:
+            self.generate_maps()
+
         dccm_paths = sorted(glob.glob(os.path.join(self.dccm_map_path, '*.npy')))
         selected_entries = [dccm_paths[i][-8:-4] for i in range(len(dccm_paths))]
 
-        if renew_maps:
-            self.generate_maps()
         if renew_residues:
             self.get_lists_of_lenghts(selected_entries)
 
