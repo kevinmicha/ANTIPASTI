@@ -240,7 +240,10 @@ class Preprocessing(object):
             l_chain = list_of_residues[-1][0]
 
             heavy.append(len([idx for idx in list_of_residues if idx[0] == h_chain]))
-            light.append(len([idx for idx in list_of_residues if idx[0] == l_chain]))
+            if h_chain != l_chain:
+                light.append(len([idx for idx in list_of_residues if idx[0] == l_chain]))
+            else:
+                light.append(0)
 
         np.save(self.chain_lengths_path+'heavy_lengths.npy', heavy)
         np.save(self.chain_lengths_path+'light_lengths.npy', light)
