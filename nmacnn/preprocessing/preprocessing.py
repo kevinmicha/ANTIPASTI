@@ -5,7 +5,7 @@ import subprocess
 import os
 
 from config import DATA_DIR, SCRIPTS_DIR, STRUCTURES_DIR
-from utils.generic_utils import noABC
+from utils.generic_utils import extract_script_result, remove_abc
 
 class Preprocessing(object):
     """
@@ -20,7 +20,7 @@ class Preprocessing(object):
             structures_path=STRUCTURES_DIR,
             df='sabdab_summary_all.tsv',
             modes=30,
-            chain_lenghts_path='chain_lengths/',
+            chain_lengths_path='chain_lengths/',
             dccm_map_path='dccm_maps/',
             residues_path='lists_of_residues/',
             file_type_input='.pdb',
@@ -41,8 +41,8 @@ class Preprocessing(object):
         :type df: str
         :param modes: number of considered normal modes
         :type modes: int
-        :param chain_lenghts_path: path to the folder containing arrays with the chain lenghts
-        :type chain_lenghts_path: str
+        :param chain_lengths_path: path to the folder containing arrays with the chain lengths
+        :type chain_lengths_path: str
         :param dccm_map_path: path to the normal mode correlation maps
         :type dccm_map_path: str
         :param residues_path: path to the folder containing the list of residues per entry
@@ -64,7 +64,7 @@ class Preprocessing(object):
         self.scripts_path = scripts_path
         self.structures_path = structures_path
         self.df_path = data_path + df
-        self.chain_lenghts_path = data_path + chain_lenghts_path
+        self.chain_lengths_path = data_path + chain_lengths_path
         self.dccm_map_path = data_path + dccm_map_path
         self.residues_path = data_path + residues_path
         self.modes = modes
@@ -223,9 +223,9 @@ class Preprocessing(object):
             if os.path.exists(path):
                 os.remove(path)
 
-    def get_lists_of_lenghts(self, selected_entries):
+    def get_lists_of_lengths(self, selected_entries):
         """
-        Retrieves lists with the lenghts of the heavy and light chains.
+        Retrieves lists with the lengths of the heavy and light chains.
         :param selected_entries: list of valid entries
 
         """
@@ -236,18 +236,18 @@ class Preprocessing(object):
             file_name = entry + self.selection
             path = self.structures_path + file_name + self.file_type_input
             self.generate_cdr1_to_cdr3_pdb(self.structures_path+entry+self.file_type_input, keepABC=True, lresidues=True)
-            subprocess.call(['/usr/local/bin/RScript '+str(self.scripts_path)+'get_chain_lengths.r '+str(path)], shell=True, stdout=open(os.devnull, 'wb'))
-           
+            output_string = subprocess.check_output(['/usr/local/bin/RScript '+str(self.scripts_path)+'get_chain_lengths.r '+str(path)], shell=True)
+
             if os.path.exists(path):
                 os.remove(path)
-            h, l = np.load('/Users/kevinmicha/Downloads/value.npy') # there might be a neat solution
+            h, l = extract_script_result(output_string)
         
             heavy.append(h)
             light.append(l)
         
-        np.save(self.chain_lenghts_path+'heavy_lengths.npy', heavy)
-        np.save(self.chain_lenghts_path+'light_lengths.npy', light)
-        np.save(self.chain_lenghts_path+'selected_entries.npy', selected_entries)
+        np.save(self.chain_lengths_path+'heavy_lengths.npy', heavy)
+        np.save(self.chain_lengths_path+'light_lengths.npy', light)
+        np.save(self.chain_lengths_path+'selected_entries.npy', selected_entries)
 
     def get_max_min_chains(self):
         """
@@ -266,11 +266,11 @@ class Preprocessing(object):
             max_res_list_h += list(set(current_list_h).difference(max_res_list_h))
             max_res_list_l += list(set(current_list_l).difference(max_res_list_l))
             
-        max_res_list_h = sorted(max_res_list_h, key=noABC)
+        max_res_list_h = sorted(max_res_list_h, key=remove_abc)
         min_res_list_h = list(dict.fromkeys([x for x in max_res_list_h]))
         max_res_list_h = [x.strip() for x in max_res_list_h]
 
-        max_res_list_l = sorted(max_res_list_l, key=noABC)
+        max_res_list_l = sorted(max_res_list_l, key=remove_abc)
         min_res_list_l = list(dict.fromkeys([x for x in max_res_list_l]))
         max_res_list_l = [x.strip() for x in max_res_list_l]
 
@@ -291,7 +291,7 @@ class Preprocessing(object):
 
     def initialisation(self, renew_maps, renew_residues):
         """
-        Computes the normal mode correlation maps and retrieves lists with the lenghts of the heavy and light chains.
+        Computes the normal mode correlation maps and retrieves lists with the lengths of the heavy and light chains.
 
         :return: one list for heavy chains, another for light chains and the selected entries
 
@@ -304,12 +304,12 @@ class Preprocessing(object):
         selected_entries = [dccm_paths[i][-8:-4] for i in range(len(dccm_paths))]
 
         if renew_residues:
-            self.get_lists_of_lenghts(selected_entries)
+            self.get_lists_of_lengths(selected_entries)
 
-        heavy = np.load(self.chain_lenghts_path+'heavy_lengths.npy').astype(int)
-        light = np.load(self.chain_lenghts_path+'light_lengths.npy').astype(int)
+        heavy = np.load(self.chain_lengths_path+'heavy_lengths.npy').astype(int)
+        light = np.load(self.chain_lengths_path+'light_lengths.npy').astype(int)
 
-        assert list(np.load(self.chain_lenghts_path+'selected_entries.npy')) == selected_entries
+        assert list(np.load(self.chain_lengths_path+'selected_entries.npy')) == selected_entries
 
         for entry in selected_entries:
             assert len(np.load(self.residues_path+entry+'.npy'))-2 == heavy[selected_entries.index(entry)] + light[selected_entries.index(entry)]

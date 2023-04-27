@@ -8,7 +8,7 @@ cat(args, sep = "\n")
 
 pdb <- read.pdb(args[1]) 
 
-getChainLenghts <- function(pdb) {
+getChainLengths <- function(pdb) {
     pos_heavy <- 1
     pos_light <- sum(lengths(pdb$atom$chain))
     hchain <- pdb$atom$chain[pos_heavy]
@@ -23,9 +23,10 @@ getChainLenghts <- function(pdb) {
     } else {
         lnum <- 0
     }
+
     return(list(hnum, lnum))
 
 }
 
-list_chains <- do.call(getChainLenghts, list(pdb))
-np$save("/Users/kevinmicha/Downloads/value.npy", list_chains)
+list_chains <- do.call(getChainLengths, list(pdb))
+print(list_chains)
