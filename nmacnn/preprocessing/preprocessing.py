@@ -5,7 +5,7 @@ import subprocess
 import os
 
 from config import DATA_DIR, SCRIPTS_DIR, STRUCTURES_DIR
-from utils.generic_utils import extract_script_result, remove_abc
+from utils.generic_utils import remove_abc
 
 class Preprocessing(object):
     """
@@ -153,7 +153,6 @@ class Preprocessing(object):
                 pathologic = True
                 h_chain = h_chain.upper()
                 l_chain = h_chain.lower()
-                print(content[0])
             else:
                 pathologic = False
                 
@@ -213,15 +212,18 @@ class Preprocessing(object):
         Generates the normal mode correlation maps.
 
         """
-        for entry in self.entries:
+        for i, entry in enumerate(self.entries):
             file_name = entry + self.selection
             path = self.structures_path + file_name + self.file_type_input
             new_path = self.dccm_map_path + entry
-            self.generate_cdr1_to_cdr3_pdb(self.structures_path+entry+self.file_type_input) 
+            self.generate_cdr1_to_cdr3_pdb(self.structures_path+entry+self.file_type_input, lresidues=True) 
             subprocess.call(['/usr/local/bin/RScript '+str(self.scripts_path)+'pdb_to_dccm.r '+str(path)+' '+str(new_path)+' '+str(self.modes)], shell=True, stdout=open(os.devnull, 'wb'))
         
             if os.path.exists(path):
                 os.remove(path)
+            
+            if i % 25 == 0: 
+                print('Map ' + str(i+1) + ' out of ' + str(len(self.entries)) + ' processed.')
 
     def get_lists_of_lengths(self, selected_entries):
         """
@@ -239,7 +241,7 @@ class Preprocessing(object):
 
             heavy.append(len([idx for idx in list_of_residues if idx[0] == h_chain]))
             light.append(len([idx for idx in list_of_residues if idx[0] == l_chain]))
-        
+
         np.save(self.chain_lengths_path+'heavy_lengths.npy', heavy)
         np.save(self.chain_lengths_path+'light_lengths.npy', light)
         np.save(self.chain_lengths_path+'selected_entries.npy', selected_entries)
