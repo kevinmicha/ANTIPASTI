@@ -26,7 +26,7 @@ class TestTraining(unittest.TestCase):
         n_filters = 2
         filter_size = 5
         pooling_size = 1
-        learning_rate = 6e-4
+        learning_rate = 4e-4
         n_max_epochs = 5
         max_corr = 0.87
         batch_size = 1
@@ -34,9 +34,9 @@ class TestTraining(unittest.TestCase):
 
         model = NormalModeAnalysisCNN(n_filters=n_filters, filter_size=filter_size, pooling_size=pooling_size, input_shape=input_shape)
         criterion = MSELoss()
-        optimizer = AdaBelief(model.parameters(), lr=learning_rate, eps=1e-8, print_change_log=False) 
+        optimiser = AdaBelief(model.parameters(), lr=learning_rate, eps=1e-8, print_change_log=False) 
 
-        training_routine(model, criterion, optimizer, train_x, val_x, train_y, val_y, n_max_epochs=n_max_epochs, max_corr=max_corr, batch_size=batch_size, verbose=False)
+        training_routine(model, criterion, optimiser, train_x, val_x, train_y, val_y, n_max_epochs=n_max_epochs, max_corr=max_corr, batch_size=batch_size, verbose=False)
 
 if __name__ == '__main__':
     pytest.main()
