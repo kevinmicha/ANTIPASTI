@@ -3,4 +3,4 @@ This subpackage contains the model class.
 
 """
 
-__all__ = []
+__all__ = ['model']
