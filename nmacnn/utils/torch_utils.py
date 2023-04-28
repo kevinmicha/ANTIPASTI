@@ -34,7 +34,27 @@ def create_validation_set(train_x, train_y, val_size=0.023):
 
     return train_x, val_x, train_y, val_y
 
-def training_step(model, criterion, optimizer, train_x, val_x, train_y, val_y, train_losses, val_losses, epoch, batch_size):
+def training_step(model, criterion, optimiser, train_x, val_x, train_y, val_y, train_losses, val_losses, epoch, batch_size, verbose):
+    """
+    Performs a training step.
+
+    :param model: Machine Learning model, for example, ``NormalModeAnalysisCNN``
+    :param criterion: calculates a gradient according to a selected loss function
+    :param optimiser: method that implements an optimisation algorithm
+    :param train_x: array of training normal mode correlation maps
+    :param val_x: array of validation normal mode correlation maps
+    :param train_y: array of training labels
+    :param val_y: array of validation labels
+    :param train_losses: list containing the history of training losses
+    :param val_losses: list containing the history of validation losses
+    :param epoch: of value ``e`` if the dataset has gone through the model ``e`` times
+    :type epoch: int
+    :param batch_size: number of samples that pass through the model before its parameters are updated
+    :type batch_size: int
+    :param verbose: ``True`` to print the losses in each epoch
+    :type verbose: bool
+
+    """    
     tr_loss = 0
     batch_size = batch_size
 
@@ -47,7 +67,7 @@ def training_step(model, criterion, optimizer, train_x, val_x, train_y, val_y, t
     
     permutation = torch.randperm(x_train.size()[0])
 
-    for i in range(0, model.input_shape, batch_size):
+    for i in range(0, x_train.size()[0], batch_size):
         
         indices = permutation[i:i+batch_size]
         batch_x, batch_y = x_train[indices], y_train[indices]
@@ -60,9 +80,9 @@ def training_step(model, criterion, optimizer, train_x, val_x, train_y, val_y, t
 
         # Training loss, clearing gradients and updating weights
         loss_train = criterion(output_train, batch_y)
-        optimizer.zero_grad()
+        optimiser.zero_grad()
         loss_train.backward()
-        optimizer.step()    
+        optimiser.step()    
         
         # Adding batch contribution to training loss
         tr_loss += loss_train.item() * batch_size / x_train.size()[0]
@@ -74,9 +94,10 @@ def training_step(model, criterion, optimizer, train_x, val_x, train_y, val_y, t
         output_v, _ = model(x_val[i].reshape(1, 1, model.input_shape, model.input_shape))
         loss_v = criterion(output_v, y_val[i])
         loss_val += loss_v / x_val.size()[0]
-        print(output_v)
-        print(y_val[i])
-        print('------------------------')
+        if verbose:
+            print(output_v)
+            print(y_val[i])
+            print('------------------------')
     val_losses.append(loss_val)
     
     # Training and validation losses
@@ -85,17 +106,37 @@ def training_step(model, criterion, optimizer, train_x, val_x, train_y, val_y, t
         
     return train_losses, val_losses, inter_filter, y_val, output_val
 
-def training_routine(model, criterion, optimizer, train_x, val_x, train_y, val_y, n_max_epochs=120, max_corr=0.87, batch_size=32):
-    
+def training_routine(model, criterion, optimiser, train_x, val_x, train_y, val_y, n_max_epochs=120, max_corr=0.87, batch_size=32, verbose=True):
+    """
+    Performs a chosen number of training steps.
+
+    :param model: Machine Learning model, for example, ``NormalModeAnalysisCNN``
+    :param criterion: calculates a gradient according to a selected loss function
+    :param optimiser: method that implements an optimisation algorithm
+    :param train_x: array of training normal mode correlation maps
+    :param val_x: array of validation normal mode correlation maps
+    :param train_y: array of training labels
+    :param val_y: array of validation labels
+    :param n_max_epochs: number of times the whole dataset goes through the model
+    :type n_max_epochs: int
+    :param max_corr: if the correlation coefficient exceeds this value, the training routine is terminated
+    :type max_corr: float
+    :param batch_size: number of samples that pass through the model before its parameters are updated
+    :type batch_size: int
+    :param verbose: ``True`` to print the losses in each epoch
+    :type verbose: bool
+
+    """    
     train_losses = []
     val_losses = []
 
     for epoch in range(n_max_epochs):
-        train_losses, val_losses, inter_filter, y_val, output_val = training_step(model, criterion, optimizer, train_x, val_x, train_y, val_y, train_losses, val_losses, epoch, batch_size)
+        train_losses, val_losses, inter_filter, y_val, output_val = training_step(model, criterion, optimiser, train_x, val_x, train_y, val_y, train_losses, val_losses, epoch, batch_size, verbose)
 
         # Computing and printing the correlation coefficient
         corr = np.corrcoef(output_val.detach().numpy().T, y_val[:,0].detach().numpy().T)[1,0]
-        print('Corr: ' + str(corr))
+        if verbose:
+            print('Corr: ' + str(corr))
         if corr > max_corr:
             break
     

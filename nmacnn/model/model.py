@@ -13,6 +13,17 @@ class NormalModeAnalysisCNN(Module):
             pooling_size=1,
             input_shape=215,
     ):
+        """
+        :param n_filters: number of filters in the convolutional layer
+        :type n_filters: int
+        :param filter_size: size of filters in the convolutional layer
+        :type filter_size: int
+        :param pooling_size: size of the max pooling operation
+        :type pooling_size: int
+        :param input_shape: shape of the normal mode correlation maps
+        :type input_shape: int
+
+        """
         super(NormalModeAnalysisCNN, self).__init__()
         self.n_filters = n_filters
         self.filter_size = filter_size
@@ -25,6 +36,12 @@ class NormalModeAnalysisCNN(Module):
         self.fc1 = Linear(self.fully_connected_input, 1, bias=False)
 
     def forward(self, x):
+        """
+        Model's forward pass.
+
+        :return: binding affinity and filters before the fully-connected layer
+            
+        """
         x = self.conv1(x) + torch.transpose(self.conv1(x), 2, 3)
         x = self.pool(x)
         inter = x = self.relu(x)
