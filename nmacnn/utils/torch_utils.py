@@ -7,6 +7,7 @@ from torch.autograd import Variable
 def create_validation_set(train_x, train_y, val_size=0.023):
     """
     Creates the validation set given a set of input images and their corresponding labels.
+
     :param train_x: array of input normal mode correlation maps
     :param train_y: array of labels
     :param val_size: fraction of original samples to be included in the validation set
@@ -54,7 +55,7 @@ def training_step(model, criterion, optimiser, train_x, val_x, train_y, val_y, t
     :param verbose: ``True`` to print the losses in each epoch
     :type verbose: bool
 
-    """    
+    """   
     tr_loss = 0
     batch_size = batch_size
 

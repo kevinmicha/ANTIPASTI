@@ -1,5 +1,5 @@
 nmacnn package
-===============
+==============
 
 Subpackages
 -----------

@@ -1,11 +1,11 @@
 nmacnn\.model package
-==============================
+=====================
 
 Submodules
 ----------
 
 nmacnn.model.model module
---------------------------
+-------------------------
 
 .. automodule:: nmacnn.model.model
     :members:
