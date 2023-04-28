@@ -78,7 +78,7 @@ class Preprocessing(object):
         self.entries, self.affinity, self.df = self.clean_df()
         self.heavy, self.light, self.selected_entries = self.initialisation(renew_maps, renew_residues)
         self.max_res_list_h, self.max_res_list_l, self.min_res_list_h, self.min_res_list_l = self.get_max_min_chains()
-        self.train_x, self.train_y, self.labels = self.load_training_images()
+        self.train_x, self.train_y, self.labels, self.raw_imgs = self.load_training_images()
 
     def clean_df(self):
         """
@@ -385,6 +385,7 @@ class Preprocessing(object):
         
         """      
         imgs = []
+        raw_imgs = []
         kds = []
         labels = []
         file_paths = sorted(glob.glob(os.path.join(self.dccm_map_path, '*.npy')))
@@ -392,10 +393,12 @@ class Preprocessing(object):
         for f in file_paths:
             pdb_id = f[-8:-4]
             if pdb_id in self.selected_entries:
+                raw_sample = np.load(f)
                 idx = self.entries.index(pdb_id)
                 idx_new = self.selected_entries.index(pdb_id)
                 labels.append(pdb_id)
-                imgs.append(self.generate_masked_image(np.load(f), idx_new, self.mode)[0])
+                raw_imgs.append(raw_sample)
+                imgs.append(self.generate_masked_image(raw_sample, idx_new, self.mode)[0])
                 kds.append(np.log10(np.float32(self.affinity[idx])))
 
         assert labels == self.selected_entries
@@ -403,4 +406,4 @@ class Preprocessing(object):
         for pdb in self.selected_entries:
             assert np.float16(10**kds[self.selected_entries.index(pdb)] == np.float16(self.df[self.df['pdb']==pdb]['affinity'])).all()
 
-        return np.array(imgs), np.array(kds), labels
+        return np.array(imgs), np.array(kds), labels, raw_imgs
