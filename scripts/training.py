@@ -7,7 +7,7 @@ from torch.nn import MSELoss
 
 from nmacnn.model.model import NormalModeAnalysisCNN
 from nmacnn.preprocessing.preprocessing import Preprocessing
-from nmacnn.utils.torch_utils import create_validation_set, training_routine
+from nmacnn.utils.torch_utils import create_test_set, training_routine
 from config import CHECKPOINTS_DIR
 
 args = None
@@ -41,9 +41,9 @@ def main(args):
     max_corr = args.max_corr
     batch_size = args.batch_size
 
-    # Preprocessing and creating the validatin set
+    # Preprocessing and creating the test set
     preprocessed_data = Preprocessing(chain_lengths_path=chain_lengths_path, dccm_map_path=dccm_map_path, residues_path=residues_path, pathological=pathological, renew_maps=False, renew_residues=False)
-    train_x, val_x, train_y, val_y = create_validation_set(preprocessed_data.train_x, preprocessed_data.train_y, val_size=0.023)
+    train_x, test_x, train_y, test_y = create_test_set(preprocessed_data.train_x, preprocessed_data.train_y, test_size=0.023)
     input_shape = preprocessed_data.train_x.shape[-1]
     
     # Defining the model, criterion and optimiser
@@ -52,31 +52,31 @@ def main(args):
     optimiser = AdaBelief(model.parameters(), lr=learning_rate, eps=1e-8, print_change_log=False) 
 
     train_losses = []
-    val_losses = []
+    test_losses = []
 
     # Training
-    train_loss, val_loss, inter_filter, y_val, output_val = training_routine(model, criterion, optimiser, train_x, val_x, train_y, val_y, n_max_epochs=n_max_epochs, max_corr=max_corr, batch_size=batch_size)
+    train_loss, test_loss, inter_filter, y_test, output_test = training_routine(model, criterion, optimiser, train_x, test_x, train_y, test_y, n_max_epochs=n_max_epochs, max_corr=max_corr, batch_size=batch_size)
 
-    # Printing prediction and ground truth (validation set)
-    print(output_val)
-    print(y_val)
+    # Printing prediction and ground truth (test set)
+    print(output_test)
+    print(y_test)
 
     # Saving the losses
     train_losses.extend(train_loss)
-    val_losses.extend(val_loss)
+    test_losses.extend(test_loss)
 
     ## Saving Neural Network checkpoint
-    EPOCH = len(val_losses)
+    EPOCH = len(test_losses)
     PATH = CHECKPOINTS_DIR + 'model_' + str(n_max_epochs) + '_epochs_' + str(pooling_size) + '_pool_' + str(n_filters) + '_filters.pt'
     TR_LOSS = train_losses
-    VAL_LOSS = val_losses
+    TEST_LOSS = test_losses
     
     torch.save({
                 'epoch': EPOCH,
                 'model_state_dict': model.state_dict(),
                 'optimiser_state_dict': optimiser.state_dict(),
                 'tr_loss': TR_LOSS,
-                'val_loss': VAL_LOSS,            
+                'test_loss': TEST_LOSS,            
                 }, PATH)
 
 if __name__ == '__main__':

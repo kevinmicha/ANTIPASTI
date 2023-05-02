@@ -10,9 +10,19 @@ import torch
 from torch.nn import Linear, ReLU, Conv2d, MaxPool2d, Module
 
 class NormalModeAnalysisCNN(Module):
-    """
-    NMA-CNN class. It predicts the binding affinity of an antibody from its normal mode correlation map.
-    
+    r"""Predicting the binding affinity of an antibody from its normal mode correlation map.
+
+    Parameters
+    ----------
+    n_filters: int
+        Number of filters in the convolutional layer.
+    filter_size: int
+        Size of filters in the convolutional layer.
+    pooling_size: int
+        Size of the max pooling operation.
+    input_shape: int
+        Shape of the normal mode correlation maps.
+
     """
     def __init__(
             self,
@@ -21,17 +31,6 @@ class NormalModeAnalysisCNN(Module):
             pooling_size=1,
             input_shape=215,
     ):
-        """
-        :param n_filters: number of filters in the convolutional layer
-        :type n_filters: int
-        :param filter_size: size of filters in the convolutional layer
-        :type filter_size: int
-        :param pooling_size: size of the max pooling operation
-        :type pooling_size: int
-        :param input_shape: shape of the normal mode correlation maps
-        :type input_shape: int
-
-        """
         super(NormalModeAnalysisCNN, self).__init__()
         self.n_filters = n_filters
         self.filter_size = filter_size
@@ -44,10 +43,14 @@ class NormalModeAnalysisCNN(Module):
         self.fc1 = Linear(self.fully_connected_input, 1, bias=False)
 
     def forward(self, x):
-        """
-        Model's forward pass.
+        r"""Model's forward pass.
 
-        :return: binding affinity and filters before the fully-connected layer
+        Returns
+        -------
+        output: torch.Tensor
+            Predicted binding affinity.
+        inter_filter: torch.Tensor
+            Filters before the fully-connected layer.
             
         """
         x = self.conv1(x) + torch.transpose(self.conv1(x), 2, 3)

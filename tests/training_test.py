@@ -7,7 +7,7 @@ from torch.nn import MSELoss
 
 from nmacnn.model.model import NormalModeAnalysisCNN
 from nmacnn.preprocessing.preprocessing import Preprocessing
-from nmacnn.utils.torch_utils import create_validation_set, training_routine
+from nmacnn.utils.torch_utils import create_test_set, training_routine
 from tests import TEST_PATH
 
 class TestTraining(unittest.TestCase):
@@ -21,7 +21,7 @@ class TestTraining(unittest.TestCase):
 
     def test_training(self):
         preprocessed_data = Preprocessing(data_path=self.data_path, structures_path=self.structures_path, scripts_path=self.scripts_path, df=self.df, pathological=self.pathological, renew_maps=False, renew_residues=False)
-        train_x, val_x, train_y, val_y = create_validation_set(preprocessed_data.train_x, preprocessed_data.train_y, val_size=0.5)
+        train_x, test_x, train_y, test_y = create_test_set(preprocessed_data.train_x, preprocessed_data.train_y, test_size=0.5)
 
         n_filters = 2
         filter_size = 5
@@ -36,7 +36,7 @@ class TestTraining(unittest.TestCase):
         criterion = MSELoss()
         optimiser = AdaBelief(model.parameters(), lr=learning_rate, eps=1e-8, print_change_log=False) 
 
-        training_routine(model, criterion, optimiser, train_x, val_x, train_y, val_y, n_max_epochs=n_max_epochs, max_corr=max_corr, batch_size=batch_size, verbose=False)
+        training_routine(model, criterion, optimiser, train_x, test_x, train_y, test_y, n_max_epochs=n_max_epochs, max_corr=max_corr, batch_size=batch_size, verbose=False)
 
 if __name__ == '__main__':
     pytest.main()

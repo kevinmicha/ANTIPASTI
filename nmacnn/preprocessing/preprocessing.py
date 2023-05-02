@@ -16,8 +16,7 @@ from config import DATA_DIR, SCRIPTS_DIR, STRUCTURES_DIR
 from utils.generic_utils import remove_abc
 
 class Preprocessing(object):
-    r"""
-    Generating the residue normal mode correlation maps.
+    r"""Generating the residue normal mode correlation maps.
     
     Parameters
     ----------
