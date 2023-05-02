@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 
-r"""MODEL CLASS.
-    
-This module contains the model class. 
+r"""This module contains the model class. 
 
 :Authors:   Kevin Michalewicz <k.michalewicz22@imperial.ac.uk>
 
@@ -34,7 +32,6 @@ class NormalModeAnalysisCNN(Module):
         :type input_shape: int
 
         """
-        super(NormalModeAnalysisCNN, self).__init__()
         self.n_filters = n_filters
         self.filter_size = filter_size
         self.pooling_size = pooling_size
