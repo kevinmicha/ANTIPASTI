@@ -8,7 +8,6 @@ from torch.nn import MSELoss
 from nmacnn.model.model import NormalModeAnalysisCNN
 from nmacnn.preprocessing.preprocessing import Preprocessing
 from nmacnn.utils.torch_utils import create_validation_set, training_routine
-from nmacnn.config import DATA_DIR, SCRIPTS_DIR, STRUCTURES_DIR
 
 args = None
 parser = argparse.ArgumentParser(description='NarrowPSFGen Options')
