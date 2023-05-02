@@ -59,7 +59,7 @@ NMA-CNN requires the following Python packages:
 The full documentation can be found [here](https://kevinmicha.github.io/predicting-affinity/). 
 
 Example notebooks are located in the [notebooks](https://github.com/kevinmicha/predicting-affinity/tree/main/notebooks) folder:
-* [[Tutorial] Training NMA-CNN with paired HL](https://github.com/kevinmicha/predicting-affinity/blob/main/notebooks/%5BTutorial%5D%20NMA%20CNN%20HL%20paired.ipynb)
+* [[Tutorial] Training NMA-CNN with paired HL](https://github.com/kevinmicha/predicting-affinity/blob/main/notebooks/%5BTutorial%5D%20Training%20NMA-CNN%20with%20paired%20HL.ipynb)
 
 ## Attribution
 
