@@ -1,3 +1,13 @@
+# -*- coding: utf-8 -*-
+
+r"""MODEL CLASS.
+    
+This module contains the model class. 
+
+:Authors:   Kevin Michalewicz <k.michalewicz22@imperial.ac.uk>
+
+"""
+
 import torch
 from torch.nn import Linear, ReLU, Conv2d, MaxPool2d, Module
 

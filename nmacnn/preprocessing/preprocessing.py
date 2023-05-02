@@ -1,3 +1,13 @@
+# -*- coding: utf-8 -*-
+
+r"""PRE-PROCESSING CLASS.
+    
+This module contains the pre-processing class. 
+
+:Authors:   Kevin Michalewicz <k.michalewicz22@imperial.ac.uk>
+
+"""
+
 import glob
 import numpy as np
 import pandas as pd
@@ -8,9 +18,40 @@ from config import DATA_DIR, SCRIPTS_DIR, STRUCTURES_DIR
 from utils.generic_utils import remove_abc
 
 class Preprocessing(object):
-    """
-    Preprocessing class. It generates the residue normal mode correlation maps.
+    r"""
+    Generating the residue normal mode correlation maps.
     
+    Parameters
+    ----------
+    data_path: str
+        Path to the data folder.
+    scripts_path: str
+        Path to the scripts folder.
+    structures_path: str
+        Path to the PDB files.
+    df: str
+        Name of the database containing the PDB entries.
+    modes: int
+        Number of considered normal modes.
+    chain_lengths_path: str
+        Path to the folder containing arrays with the chain lengths.
+    dccm_map_path: str
+        Path to the normal mode correlation maps.
+    residues_path: str
+        Path to the folder containing the list of residues per entry.
+    file_type_input: str
+        Filename extension of input structures.
+    selection: str
+        Considered portion of antibody chains.
+    pathological: list 
+        PDB identifiers of antibodies that need to be excluded.
+    renew_maps: bool
+        Compute all the normal mode correlation maps.
+    renew_residues: bool
+        Retrieve the lists of residues for each entry.
+    mode: str
+        Choose between ``fully-cropped`` and ``fully-extended``.
+
     """
 
     def __init__(
@@ -30,36 +71,6 @@ class Preprocessing(object):
             renew_residues=False,
             mode='fully-extended',
     ):
-        """
-        :param data_path: path to the data folder
-        :type data_path: str
-        :param scripts_path: path to the scripts folder
-        :type scripts_path: str
-        :param structures_path: path to the PDB files
-        :type structures_path: str
-        :param df: name of the database containing the PDB entries
-        :type df: str
-        :param modes: number of considered normal modes
-        :type modes: int
-        :param chain_lengths_path: path to the folder containing arrays with the chain lengths
-        :type chain_lengths_path: str
-        :param dccm_map_path: path to the normal mode correlation maps
-        :type dccm_map_path: str
-        :param residues_path: path to the folder containing the list of residues per entry
-        :type residues_path: str
-        :param file_type_input: filename extension of input structures
-        :type file_type_input: str
-        :param selection: considered portion of antibody chains
-        :type selection: str
-        :param pathological: list containing the PDB identifiers of antibodies that need to be excluded
-        :param renew_maps: compute all the normal mode correlation maps
-        :type renew_maps: bool
-        :param renew_residues: retrieve the lists of residues for each entry
-        :type renew_residues: bool
-        :param mode: choose between ``fully-cropped`` and ``fully-extended``
-        :type mode: str
-
-        """
         self.data_path = data_path
         self.scripts_path = scripts_path
         self.structures_path = structures_path
@@ -81,10 +92,16 @@ class Preprocessing(object):
         self.train_x, self.train_y, self.labels, self.raw_imgs = self.load_training_images()
 
     def clean_df(self):
-        """
-        Cleans the database containing the PDB entries.
+        r"""Cleans the database containing the PDB entries.
 
-        :return: a list of the PDB entries, a list of the binding affinities and the underlying database
+        Returns
+        -------
+        df_pdbs: list
+            PDB entries.
+        df_kds: list 
+            Binding affinities.
+        df: pandas.DataFrame
+            Cleaned database.
 
         """
 
@@ -97,19 +114,20 @@ class Preprocessing(object):
         return list(df['pdb']), list(df['affinity']), df
 
     def generate_cdr1_to_cdr3_pdb(self, path, keepABC=True, lresidues=False, hupsymchain=None, lupsymchain=None):
-        """
-        Generates a new PDB file going from the beginning of the CDR1 until the end of the CDR3.
+        r"""Generates a new PDB file going from the beginning of the CDR1 until the end of the CDR3.
 
-        :param path: path of a Chothia-numbered PDB file 
-        :type path: str
-        :param keepABC: keeps residues whose name ends with a letter from 'A' to 'Z'
-        :type keepABC: bool
-        :param lresidues: the names of each residue are stored in ``self.residues_path``
-        :type lresidues: bool
-        :param hupsymchain: upper limit of heavy chain residues due to a change in the numbering convention. Only useful when using ``AlphaFold``
-        :type hupsymchain: int
-        :param lupsymchain: upper limit of light chain residues due to a change in the numbering convention. Only useful when using ``AlphaFold``
-        :type lupsymchain: int
+        Parameters
+        ----------
+        path: str
+            Path of a Chothia-numbered PDB file.
+        keepABC: bool
+            Keeps residues whose name ends with a letter from 'A' to 'Z'.
+        lresidues: bool
+            The names of each residue are stored in ``self.residues_path``.
+        upsymchain: int
+            Upper limit of heavy chain residues due to a change in the numbering convention. Only useful when using ``AlphaFold``.
+        lupsymchain: int
+            Upper limit of light chain residues due to a change in the numbering convention. Only useful when using ``AlphaFold``.
 
         """
         list_residues = ['START']
@@ -208,8 +226,7 @@ class Preprocessing(object):
                 f_new.writelines([content[l][:start_chain]+new_lchain+content[l][start_chain+1:] for l in idx_list_l])
 
     def generate_maps(self):
-        """
-        Generates the normal mode correlation maps.
+        r"""Generates the normal mode correlation maps.
 
         """
         for i, entry in enumerate(self.entries):
@@ -226,9 +243,12 @@ class Preprocessing(object):
                 print('Map ' + str(i+1) + ' out of ' + str(len(self.entries)) + ' processed.')
 
     def get_lists_of_lengths(self, selected_entries):
-        """
-        Retrieves lists with the lengths of the heavy and light chains.
-        :param selected_entries: list of valid entries
+        r"""Retrieves lists with the lengths of the heavy and light chains.
+        
+        Parameters
+        ----------
+        selected_entries: list
+            PDB valid entries.
 
         """
         heavy = []
@@ -250,8 +270,7 @@ class Preprocessing(object):
         np.save(self.chain_lengths_path+'selected_entries.npy', selected_entries)
 
     def get_max_min_chains(self):
-        """
-        Returns the longest and shortest possible chains.
+        r"""Returns the longest and shortest possible chains.
 
         """
         max_res_list_h = []
@@ -290,10 +309,16 @@ class Preprocessing(object):
 
 
     def initialisation(self, renew_maps, renew_residues):
-        """
-        Computes the normal mode correlation maps and retrieves lists with the lengths of the heavy and light chains.
+        r"""Computes the normal mode correlation maps and retrieves lists with the lengths of the heavy and light chains.
 
-        :return: one list for heavy chains, another for light chains and the selected entries
+        Returns
+        -------
+        heavy: list
+            Lengths of the heavy chains.
+        light: list 
+            Lengths of the light chains.
+        selected_entries: list
+            PDB valid entries.
 
         """
 
@@ -317,18 +342,25 @@ class Preprocessing(object):
         return heavy, light, selected_entries
 
     def generate_masked_image(self, img, idx, test_h=None, test_l=None):
-        """
-        Generates a masked normal mode correlation map
+        r"""Generates a masked normal mode correlation map
 
-        :param img: original array containing no blank pixels
-        :param idx: input index
-        :type idx: int
-        :param test_h: length of the heavy chain of an antibody in the test set
-        :type test_h: int
-        :param test_l: length of the light chain of an antibody in the test set
-        :type test_l: int
+        Parameters
+        ----------
+        img: numpy.ndarray
+            Original array containing no blank pixels.
+        idx: int
+            Input index.
+        test_h: int
+            Length of the heavy chain of an antibody in the test set.
+        test_l: int
+            Length of the light chain of an antibody in the test set.
 
-        :return: masked normal mode correlation map and the mask itself
+        Returns
+        -------
+        masked: numpy.ndarray
+            Masked normal mode correlation map.
+        mask: numpy.ndarray
+            Mask itself.
         
         """       
         f = self.file_residues_paths[idx]
@@ -379,8 +411,7 @@ class Preprocessing(object):
         return masked, mask
 
     def load_training_images(self):
-        """
-        Returns the input/output pairs of the model and their corresponding labels.
+        r"""Returns the input/output pairs of the model and their corresponding labels.
 
         
         """      
