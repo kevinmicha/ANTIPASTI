@@ -8,6 +8,7 @@ from torch.nn import MSELoss
 from nmacnn.model.model import NormalModeAnalysisCNN
 from nmacnn.preprocessing.preprocessing import Preprocessing
 from nmacnn.utils.torch_utils import create_validation_set, training_routine
+from config import CHECKPOINTS_DIR
 
 args = None
 parser = argparse.ArgumentParser(description='NarrowPSFGen Options')
@@ -66,7 +67,7 @@ def main(args):
 
     ## Saving Neural Network checkpoint
     EPOCH = len(val_losses)
-    PATH = 'model_' + n_max_epochs + '_epochs_' + pooling_size + '_pool_' + n_filters + '_filters.pt'
+    PATH = CHECKPOINTS_DIR + 'model_' + str(n_max_epochs) + '_epochs_' + str(pooling_size) + '_pool_' + str(n_filters) + '_filters.pt'
     TR_LOSS = train_losses
     VAL_LOSS = val_losses
     
