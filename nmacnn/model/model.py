@@ -32,6 +32,7 @@ class NormalModeAnalysisCNN(Module):
         :type input_shape: int
 
         """
+        super(NormalModeAnalysisCNN, self).__init__()
         self.n_filters = n_filters
         self.filter_size = filter_size
         self.pooling_size = pooling_size
