@@ -2,12 +2,14 @@ import os
 import pytest
 import unittest
 
+import torch
 from adabelief_pytorch import AdaBelief
 from torch.nn import MSELoss
 
 from nmacnn.model.model import NormalModeAnalysisCNN
 from nmacnn.preprocessing.preprocessing import Preprocessing
 from nmacnn.utils.torch_utils import create_test_set, training_routine
+from nmacnn.config import CHECKPOINTS_DIR
 from tests import TEST_PATH
 
 class TestTraining(unittest.TestCase):
@@ -27,7 +29,7 @@ class TestTraining(unittest.TestCase):
         filter_size = 5
         pooling_size = 1
         learning_rate = 4e-4
-        n_max_epochs = 5
+        n_max_epochs = 10
         max_corr = 0.87
         batch_size = 1
         input_shape = preprocessed_data.train_x.shape[-1]
@@ -36,7 +38,26 @@ class TestTraining(unittest.TestCase):
         criterion = MSELoss()
         optimiser = AdaBelief(model.parameters(), lr=learning_rate, eps=1e-8, print_change_log=False) 
 
-        training_routine(model, criterion, optimiser, train_x, test_x, train_y, test_y, n_max_epochs=n_max_epochs, max_corr=max_corr, batch_size=batch_size, verbose=False)
+        train_losses = []
+        test_losses = []
+        train_loss, test_loss, inter_filter, y_test, output_test = training_routine(model, criterion, optimiser, train_x, test_x, train_y, test_y, n_max_epochs=n_max_epochs, max_corr=max_corr, batch_size=batch_size, verbose=False)
+
+        # Saving the losses
+        train_losses.extend(train_loss)
+        test_losses.extend(test_loss)
+
+        EPOCH = len(test_losses)
+        PATH = 'checkpoints/model_unit_test.pt'
+        TR_LOSS = train_losses
+        TEST_LOSS = test_losses
+        
+        torch.save({
+                    'epoch': EPOCH,
+                    'model_state_dict': model.state_dict(),
+                    'optimiser_state_dict': optimiser.state_dict(),
+                    'tr_loss': TR_LOSS,
+                    'test_loss': TEST_LOSS,            
+                    }, PATH)
 
 if __name__ == '__main__':
     pytest.main()

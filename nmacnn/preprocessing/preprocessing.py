@@ -48,6 +48,8 @@ class Preprocessing(object):
         Retrieve the lists of residues for each entry.
     mode: str
         Choose between ``fully-cropped`` and ``fully-extended``.
+    mode: str
+        Choose between ``training`` and ``predicting``.
 
     """
 
@@ -67,11 +69,14 @@ class Preprocessing(object):
             renew_maps=False,
             renew_residues=False,
             mode='fully-extended',
+            stage='training',
+            test_dccm_map_path=None,
+            test_residues_path=None,
+            test_structure_path=None,
     ):
         self.data_path = data_path
         self.scripts_path = scripts_path
         self.structures_path = structures_path
-        self.df_path = data_path + df
         self.chain_lengths_path = data_path + chain_lengths_path
         self.dccm_map_path = data_path + dccm_map_path
         self.residues_path = data_path + residues_path
@@ -80,13 +85,22 @@ class Preprocessing(object):
         self.selection = selection
         self.pathological = pathological
         self.mode = mode
-
+        self.stage = stage
         self.file_residues_paths = sorted(glob.glob(os.path.join(self.residues_path, '*.npy')))
 
+        self.df_path = data_path + df
         self.entries, self.affinity, self.df = self.clean_df()
         self.heavy, self.light, self.selected_entries = self.initialisation(renew_maps, renew_residues)
         self.max_res_list_h, self.max_res_list_l, self.min_res_list_h, self.min_res_list_l = self.get_max_min_chains()
-        self.train_x, self.train_y, self.labels, self.raw_imgs = self.load_training_images()
+
+        if self.stage == 'training':
+            self.train_x, self.train_y, self.labels, self.raw_imgs = self.load_training_images()
+        else:
+            self.test_dccm_map_path = test_dccm_map_path
+            self.test_residues_path = test_residues_path
+            self.test_structure_path = test_structure_path
+            self.test_x = self.load_test_image()
+
 
     def clean_df(self):
         r"""Cleans the database containing the PDB entries.
@@ -127,7 +141,12 @@ class Preprocessing(object):
             Upper limit of light chain residues due to a change in the numbering convention. Only useful when using ``AlphaFold``.
 
         """
+        if self.stage == 'training':
+            rpath = self.residues_path
+        else:
+            rpath = self.test_residues_path
         list_residues = ['START']
+
         with open(path, 'r') as f: # needs to be Chothia-numbered
             content = f.readlines()
             header_lines_important = range(4)
@@ -203,7 +222,7 @@ class Preprocessing(object):
         # List with name of every residue is saved if selected
         if lresidues == True:
             list_residues.append('END')
-            np.save(self.residues_path + path[-8:-4] + '.npy', list_residues)
+            np.save(rpath + path[-8:-4] + '.npy', list_residues)
                                         
         # Creating new file
         with open(new_path, 'w') as f_new:
@@ -247,12 +266,26 @@ class Preprocessing(object):
         selected_entries: list
             PDB valid entries.
 
+        Returns
+        -------
+        heavy: list
+            Lengths of the heavy chains. In the context of the prediction stage, this list has one element.
+        light: list 
+            Lengths of the light chains. In the context of the prediction stage, this list has one element.
+        selected_entries: list
+            PDB valid entries. In the context of the prediction stage, this list has one element.
+
         """
         heavy = []
         light = []
 
+        if self.stage == 'training':
+            rpath = self.residues_path
+        else:
+            rpath = self.test_residues_path
+
         for entry in selected_entries:
-            list_of_residues = np.load(self.residues_path+entry+'.npy')[1:-1]
+            list_of_residues = np.load(rpath+entry+'.npy')[1:-1]
             h_chain = list_of_residues[0][0]
             l_chain = list_of_residues[-1][0]
 
@@ -262,9 +295,7 @@ class Preprocessing(object):
             else:
                 light.append(0)
 
-        np.save(self.chain_lengths_path+'heavy_lengths.npy', heavy)
-        np.save(self.chain_lengths_path+'light_lengths.npy', light)
-        np.save(self.chain_lengths_path+'selected_entries.npy', selected_entries)
+        return heavy, light, selected_entries
 
     def get_max_min_chains(self):
         r"""Returns the longest and shortest possible chains.
@@ -333,10 +364,13 @@ class Preprocessing(object):
         selected_entries = [dccm_paths[i][-8:-4] for i in range(len(dccm_paths))]
 
         if renew_residues:
-            self.get_lists_of_lengths(selected_entries)
-
-        heavy = np.load(self.chain_lengths_path+'heavy_lengths.npy').astype(int)
-        light = np.load(self.chain_lengths_path+'light_lengths.npy').astype(int)
+            heavy, light, selected_entries = self.get_lists_of_lengths(selected_entries)
+            np.save(self.chain_lengths_path+'heavy_lengths.npy', heavy)
+            np.save(self.chain_lengths_path+'light_lengths.npy', light)
+            np.save(self.chain_lengths_path+'selected_entries.npy', selected_entries)
+        else:
+            heavy = np.load(self.chain_lengths_path+'heavy_lengths.npy').astype(int)
+            light = np.load(self.chain_lengths_path+'light_lengths.npy').astype(int)
 
         assert list(np.load(self.chain_lengths_path+'selected_entries.npy')) == selected_entries
 
@@ -366,18 +400,19 @@ class Preprocessing(object):
         mask: numpy.ndarray
             Mask itself.
         
-        """       
-        f = self.file_residues_paths[idx]
+        """
+        if self.stage == 'training':    
+            f = self.file_residues_paths[idx]
+        else:
+            f = sorted(glob.glob(os.path.join(self.test_residues_path, '*.npy')))[0]
         f_res = np.load(f)
-        res_ending = '_residues.npy'
         max_res_h = len(self.max_res_list_h)
         max_res_l = len(self.max_res_list_l)
         max_res = max_res_h + max_res_l 
         masked = np.zeros((max_res, max_res))
         mask = np.zeros((max_res, max_res))
         
-        if f.endswith(res_ending):
-            f = f.replace(res_ending, '.npy')
+        if self.stage != 'training':
             h = test_h
             l = test_l
         else:
@@ -433,7 +468,7 @@ class Preprocessing(object):
                 idx_new = self.selected_entries.index(pdb_id)
                 labels.append(pdb_id)
                 raw_imgs.append(raw_sample)
-                imgs.append(self.generate_masked_image(raw_sample, idx_new, self.mode)[0])
+                imgs.append(self.generate_masked_image(raw_sample, idx_new)[0])
                 kds.append(np.log10(np.float32(self.affinity[idx])))
 
         assert labels == self.selected_entries
@@ -442,3 +477,26 @@ class Preprocessing(object):
             assert np.float16(10**kds[self.selected_entries.index(pdb)] == np.float16(self.df[self.df['pdb']==pdb]['affinity'])).all()
 
         return np.array(imgs), np.array(kds), labels, raw_imgs
+
+    def load_test_image(self):
+        r"""Returns a test normal mode correlation map which is masked according to the existing residues in the training set.
+
+        """  
+
+        # Generating the normal mode correlation map
+        pdb_id = sorted(glob.glob(os.path.join(self.test_structure_path, '*'+self.file_type_input)))[0][-8:-4]
+        file_name = pdb_id + self.selection
+        path = self.test_structure_path + file_name + self.file_type_input
+        new_path = self.test_dccm_map_path + pdb_id
+        self.generate_cdr1_to_cdr3_pdb(self.test_structure_path+pdb_id+self.file_type_input, lresidues=True) 
+        subprocess.call(['/usr/local/bin/RScript '+str(self.scripts_path)+'pdb_to_dccm.r '+str(path)+' '+str(new_path)+' '+str(self.modes)], shell=True, stdout=open(os.devnull, 'wb'))
+        if os.path.exists(path):
+            os.remove(path)
+
+        # Getting lengths, residues and masking
+        file_path = sorted(glob.glob(os.path.join(self.test_dccm_map_path, '*.npy')))
+        for f in file_path:
+            raw_sample = np.load(f)
+            h, l, _ = self.get_lists_of_lengths(selected_entries=str(pdb_id).split())
+
+        return self.generate_masked_image(raw_sample, 0, test_h=int(h[0]), test_l=int(l[0]))[0]
