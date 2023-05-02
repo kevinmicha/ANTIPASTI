@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 
-r"""PRE-PROCESSING CLASS.
-    
-This module contains the pre-processing class. 
+r"""This module contains the pre-processing class. 
 
 :Authors:   Kevin Michalewicz <k.michalewicz22@imperial.ac.uk>
 
@@ -310,6 +308,13 @@ class Preprocessing(object):
 
     def initialisation(self, renew_maps, renew_residues):
         r"""Computes the normal mode correlation maps and retrieves lists with the lengths of the heavy and light chains.
+
+        Parameters
+        ----------
+        renew_maps: bool
+            Compute all the normal mode correlation maps.
+        renew_residues: bool
+            Retrieve the lists of residues for each entry.
 
         Returns
         -------
