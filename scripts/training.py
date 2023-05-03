@@ -11,13 +11,15 @@ from nmacnn.utils.torch_utils import create_test_set, training_routine
 from config import CHECKPOINTS_DIR
 
 args = None
-parser = argparse.ArgumentParser(description='NarrowPSFGen Options')
+parser = argparse.ArgumentParser(description='Training Options')
 parser.add_argument('--n_filters', dest='n_filters', type=int,
                     default=2, help='Number of filters in the convolutional layer.')
 parser.add_argument('--filter_size', dest='filter_size', type=int,
                     default=5, help='Size of filters in the convolutional layer.')
 parser.add_argument('--pooling_size', dest='pooling_size', type=int,
                     default=1, help='Size of the max pooling operation.')
+parser.add_argument('--modes', dest='modes', type=int,
+                    default=30, help='Normal modes into consideration.')
 parser.add_argument('--learning_rate', dest='learning_rate', type=float,
                     default=4e-4, help='Step size at each iteration.')
 parser.add_argument('--n_max_epochs', dest='n_max_epochs', type=int,
@@ -36,13 +38,14 @@ def main(args):
     n_filters = args.n_filters
     filter_size = args.filter_size
     pooling_size = args.pooling_size
+    modes = args.modes
     learning_rate = args.learning_rate
     n_max_epochs = args.n_max_epochs
     max_corr = args.max_corr
     batch_size = args.batch_size
 
     # Preprocessing and creating the test set
-    preprocessed_data = Preprocessing(chain_lengths_path=chain_lengths_path, dccm_map_path=dccm_map_path, residues_path=residues_path, pathological=pathological, renew_maps=False, renew_residues=False)
+    preprocessed_data = Preprocessing(chain_lengths_path=chain_lengths_path, dccm_map_path=dccm_map_path, residues_path=residues_path, modes=modes, pathological=pathological, renew_maps=False, renew_residues=False)
     train_x, test_x, train_y, test_y = create_test_set(preprocessed_data.train_x, preprocessed_data.train_y, test_size=0.023)
     input_shape = preprocessed_data.train_x.shape[-1]
     
@@ -67,7 +70,7 @@ def main(args):
 
     ## Saving Neural Network checkpoint
     EPOCH = len(test_losses)
-    PATH = CHECKPOINTS_DIR + 'model_' + str(n_max_epochs) + '_epochs_' + str(pooling_size) + '_pool_' + str(n_filters) + '_filters.pt'
+    PATH = CHECKPOINTS_DIR + 'model_epochs_' + str(n_max_epochs) + '_modes_' + str(modes) + '_pool_' + str(pooling_size) + '_filters_' + str(n_filters) + '_size_' + str(filter_size) + '.pt'
     TR_LOSS = train_losses
     TEST_LOSS = test_losses
     
