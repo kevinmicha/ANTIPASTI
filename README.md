@@ -60,6 +60,7 @@ The full documentation can be found [here](https://kevinmicha.github.io/predicti
 
 Example notebooks are located in the [notebooks](https://github.com/kevinmicha/predicting-affinity/tree/main/notebooks) folder:
 * [[Tutorial] Training NMA-CNN with paired HL](https://github.com/kevinmicha/predicting-affinity/blob/main/notebooks/%5BTutorial%5D%20Training%20NMA-CNN%20with%20paired%20HL.ipynb)
+* [[Tutorial] Predicting affinity using NMA-CNN with paired HL](https://github.com/kevinmicha/predicting-affinity/blob/main/notebooks/%5BTutorial%5D%20Predicting%20affinity%20using%20NMA-CNN%20with%20paired%20HL.ipynb)
 
 ## Attribution
 
