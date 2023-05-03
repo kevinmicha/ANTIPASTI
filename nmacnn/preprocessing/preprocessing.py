@@ -48,8 +48,14 @@ class Preprocessing(object):
         Retrieve the lists of residues for each entry.
     mode: str
         Choose between ``fully-cropped`` and ``fully-extended``.
-    mode: str
+    stage: str
         Choose between ``training`` and ``predicting``.
+    test_dccm_map_path: str
+        Path to the testnormal mode correlation maps.
+    test_residues_path: str
+        Path to the folder containing the list of residues for a test sample.
+    structures_path: str
+        Path to the test PDB file.
 
     """
 
