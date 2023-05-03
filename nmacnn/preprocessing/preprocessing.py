@@ -54,7 +54,7 @@ class Preprocessing(object):
         Path to the testnormal mode correlation maps.
     test_residues_path: str
         Path to the folder containing the list of residues for a test sample.
-    structures_path: str
+    test_structures_path: str
         Path to the test PDB file.
 
     """
@@ -91,17 +91,17 @@ class Preprocessing(object):
         self.selection = selection
         self.pathological = pathological
         self.mode = mode
-        self.stage = stage
+        self.stage = 'training'
         self.file_residues_paths = sorted(glob.glob(os.path.join(self.residues_path, '*.npy')))
 
         self.df_path = data_path + df
         self.entries, self.affinity, self.df = self.clean_df()
         self.heavy, self.light, self.selected_entries = self.initialisation(renew_maps, renew_residues)
         self.max_res_list_h, self.max_res_list_l, self.min_res_list_h, self.min_res_list_l = self.get_max_min_chains()
-
-        if self.stage == 'training':
-            self.train_x, self.train_y, self.labels, self.raw_imgs = self.load_training_images()
-        else:
+        self.train_x, self.train_y, self.labels, self.raw_imgs = self.load_training_images()
+        self.stage = stage
+        
+        if self.stage != 'training':
             self.test_dccm_map_path = test_dccm_map_path
             self.test_residues_path = test_residues_path
             self.test_structure_path = test_structure_path
