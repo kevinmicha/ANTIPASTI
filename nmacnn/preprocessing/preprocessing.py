@@ -54,7 +54,7 @@ class Preprocessing(object):
         Path to the testnormal mode correlation maps.
     test_residues_path: str
         Path to the folder containing the list of residues for a test sample.
-    structures_path: str
+    test_structures_path: str
         Path to the test PDB file.
 
     """
