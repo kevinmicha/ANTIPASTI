@@ -94,7 +94,7 @@ def map_residues_to_regions(preprocessed_data, epsilon):
     coord: numpy.ndarray
         The coordinates of the antibody regions.
     maps: list
-        The maps of the antibody regions.
+        The maps of the antibody regions coming from ``epsilon``.
     ticks: list
         Locations where to place the ticks on the antibody regions plots.
     ticks_labels: list
@@ -143,3 +143,36 @@ def map_residues_to_regions(preprocessed_data, epsilon):
 
     return np.array(coord, dtype=object), maps, ticks, ticks_labels, titles, rmax
 
+def compute_change_in_kd(preprocessed_data, model, weights, coord, maps):
+    r"""Prints the percentage change in Kd when adding epsilon.
+
+    Parameters
+    ----------
+    preprocessed_data: nmacnn.model.model.Preprocessing
+        The ``Preprocessing`` class.
+    model: nmacnn.model.model.NormalModeAnalysisCNN
+        The model class, i.e., ``NormalModeAnalysisCNN``.
+    weights: numpy.ndarray
+        The weights given to each antibody region.
+    coord: numpy.ndarray
+        The coordinates of the antibody regions.
+    maps: list
+        The maps of the antibody regions coming from ``epsilon``.
+
+    """
+    input_shape = preprocessed_data.train_x.shape[-1]
+
+    # Adding epsilon
+    ideal = deepcopy(preprocessed_data.test_x)
+    for i in range(len(weights)):
+        temp = deepcopy(np.pad(maps[i], ((0, 0), (coord[i][0], ideal.shape[-1]-coord[i][-1]-1))))
+        ideal += weights[i] * (temp + np.transpose(temp)) / 2
+
+    # Comparing the new Kd w.r.t the original one
+    prediction = 10**model(torch.from_numpy(preprocessed_data.test_x.reshape(1, 1, input_shape, input_shape).astype(np.float32)))[0].detach().numpy()
+    new_prediction = 10**model(torch.from_numpy(ideal.reshape(1, 1, input_shape, input_shape).astype(np.float32)))[0].detach().numpy()
+    per_change = ((prediction - new_prediction) / prediction * 100)[0][0]
+
+    print('Without adding epsilon, Kd = ' + str(prediction[0,0]))
+    print('After adding epsilon, Kd = ' + str(new_prediction[0,0]))
+    print('Thus, Kd is smaller by', per_change, '%')
