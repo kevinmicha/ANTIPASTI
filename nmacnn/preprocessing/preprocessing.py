@@ -56,6 +56,10 @@ class Preprocessing(object):
         Path to the folder containing the list of residues for a test sample.
     test_structures_path: str
         Path to the test PDB file.
+    test_pdb_id: str
+        Test PDB ID.
+    alphafold: bool
+        ``True`` the test structure was folded using ``AlphaFold``.
 
     """
 
@@ -79,6 +83,8 @@ class Preprocessing(object):
             test_dccm_map_path=None,
             test_residues_path=None,
             test_structure_path=None,
+            test_pdb_id='1t66',
+            alphafold=False,
     ):
         self.data_path = data_path
         self.scripts_path = scripts_path
@@ -93,6 +99,7 @@ class Preprocessing(object):
         self.mode = mode
         self.stage = 'training'
         self.file_residues_paths = sorted(glob.glob(os.path.join(self.residues_path, '*.npy')))
+        self.alphafold = alphafold
 
         self.df_path = data_path + df
         self.entries, self.affinity, self.df = self.clean_df()
@@ -100,11 +107,12 @@ class Preprocessing(object):
         self.max_res_list_h, self.max_res_list_l, self.min_res_list_h, self.min_res_list_l = self.get_max_min_chains()
         self.train_x, self.train_y, self.labels, self.raw_imgs = self.load_training_images()
         self.stage = stage
-        
+
         if self.stage != 'training':
             self.test_dccm_map_path = test_dccm_map_path
             self.test_residues_path = test_residues_path
             self.test_structure_path = test_structure_path
+            self.test_pdb_id = test_pdb_id
             self.test_x = self.load_test_image()
 
 
@@ -181,11 +189,13 @@ class Preprocessing(object):
                 idx_list = [0]
                 h_range = range(26, hupsymchain)
                 l_range = range(24, lupsymchain)
+                h_pos = start_chain
+                l_pos = start_chain
                 
             if line.find(l_chain_key) != -1:
                 l_pos = line.find(l_chain_key) + len(l_chain_key) + 1
                 l_chain = line[l_pos:l_pos+1]
-            else: 
+            elif self.alphafold is False: 
                 l_chain = None
                 
             # Checking if H and L chains have the same name
@@ -238,8 +248,9 @@ class Preprocessing(object):
             else:
                 new_hchain = h_chain
                 new_lchain = l_chain
+
             f_new.writelines([content[l] for l in idx_list[:header_lines_important[-1]]])
-            if l_chain is not None:
+            if l_chain is not None and self.alphafold is False:
                 f_new.writelines([content[l][:h_pos]+new_hchain+content[l][h_pos+1:l_pos]+new_lchain+content[l][l_pos+1:] for l in idx_list[header_lines_important[-1]:header_lines_important[-1]+1]])
             else:
                 f_new.writelines([content[l][:h_pos]+new_hchain+content[l][h_pos+1:] for l in idx_list[header_lines_important[-1]:header_lines_important[-1]+1]])
@@ -409,8 +420,11 @@ class Preprocessing(object):
         """
         if self.stage == 'training':    
             f = self.file_residues_paths[idx]
+        elif self.alphafold is False:
+            f = sorted(glob.glob(os.path.join(self.test_residues_path, '*'+self.test_pdb_id+'.npy')))[0]
         else:
-            f = sorted(glob.glob(os.path.join(self.test_residues_path, '*.npy')))[0]
+            f = sorted(glob.glob(os.path.join(self.test_residues_path, '*'+self.test_pdb_id.removesuffix('_af')+'.npy')))[0]
+
         f_res = np.load(f)
         max_res_h = len(self.max_res_list_h)
         max_res_l = len(self.max_res_list_l)
@@ -488,21 +502,36 @@ class Preprocessing(object):
         r"""Returns a test normal mode correlation map which is masked according to the existing residues in the training set.
 
         """  
+        pdb_id = self.test_pdb_id
+
+        if self.alphafold is True:
+            h, l, _ = self.get_lists_of_lengths(selected_entries=str(pdb_id.removesuffix('_af')).split())
+            h = h[0] 
+            l = l[0] 
+            hupsymchain = 26 + h + 1
+            lupsymchain = 24 + l + 1
+            lresidues = False
+        else:
+            hupsymchain = None
+            lupsymchain = None
+            lresidues = True
 
         # Generating the normal mode correlation map
-        pdb_id = sorted(glob.glob(os.path.join(self.test_structure_path, '*'+self.file_type_input)))[0][-8:-4]
         file_name = pdb_id + self.selection
         path = self.test_structure_path + file_name + self.file_type_input
         new_path = self.test_dccm_map_path + pdb_id
-        self.generate_cdr1_to_cdr3_pdb(self.test_structure_path+pdb_id+self.file_type_input, lresidues=True) 
+        self.generate_cdr1_to_cdr3_pdb(self.test_structure_path+pdb_id+self.file_type_input, lresidues=lresidues, hupsymchain=hupsymchain, lupsymchain=lupsymchain) 
         subprocess.call(['/usr/local/bin/RScript '+str(self.scripts_path)+'pdb_to_dccm.r '+str(path)+' '+str(new_path)+' '+str(self.modes)], shell=True, stdout=open(os.devnull, 'wb'))
         if os.path.exists(path):
             os.remove(path)
 
         # Getting lengths, residues and masking
-        file_path = sorted(glob.glob(os.path.join(self.test_dccm_map_path, '*.npy')))
+        file_path = sorted(glob.glob(os.path.join(self.test_dccm_map_path, '*'+pdb_id+'.npy')))
         for f in file_path:
             raw_sample = np.load(f)
-            h, l, _ = self.get_lists_of_lengths(selected_entries=str(pdb_id).split())
+            if self.alphafold is False:
+                h, l, _ = self.get_lists_of_lengths(selected_entries=str(pdb_id).split())
+                h = h[0]
+                l = l[0]
 
-        return self.generate_masked_image(raw_sample, 0, test_h=int(h[0]), test_l=int(l[0]))[0]
+        return self.generate_masked_image(raw_sample, 0, test_h=int(h), test_l=int(l))[0]
