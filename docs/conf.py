@@ -13,7 +13,7 @@
 import os
 import sys
 sys.path.insert(0, os.path.abspath('../'))
-autodoc_mock_imports = ['numpy', 'pandas', 'sklearn', 'torch']
+autodoc_mock_imports = ['adabelief_pytorch', 'numpy', 'pandas', 'sklearn', 'torch']
 
 
 # -- Project information -----------------------------------------------------
