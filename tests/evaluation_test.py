@@ -1,13 +1,12 @@
 import os
 import numpy as np
 import pytest
+import torch
 import unittest
 
-import torch
-from adabelief_pytorch import AdaBelief
-
-from nmacnn.model.model import NormalModeAnalysisCNN
 from nmacnn.preprocessing.preprocessing import Preprocessing
+from nmacnn.utils.torch_utils import load_checkpoint
+
 from tests import TEST_PATH
 
 class TestTraining(unittest.TestCase):
@@ -29,18 +28,12 @@ class TestTraining(unittest.TestCase):
         preprocessed_data = Preprocessing(data_path=self.data_path, structures_path=self.structures_path, scripts_path=self.scripts_path, df=self.df, pathological=self.pathological, stage=self.stage, test_dccm_map_path=self.test_dccm_map_path, test_residues_path=self.test_residues_path, test_structure_path=self.test_structure_path)
         input_shape = preprocessed_data.test_x.shape[-1]
 
-        PATH = 'checkpoints/model_unit_test.pt'
-        model = NormalModeAnalysisCNN(input_shape=input_shape)
-        optimiser = AdaBelief(model.parameters())
-        checkpoint = torch.load(PATH)
-        model.load_state_dict(checkpoint['model_state_dict'])
-        optimiser.load_state_dict(checkpoint['optimiser_state_dict'])
-        epoch = checkpoint['epoch']
-        train_losses = checkpoint['tr_loss']
-        test_losses = checkpoint['test_loss']
+        path = 'checkpoints/model_unit_test.pt'
+        model = load_checkpoint(path, input_shape)[0]
         model.eval()
 
         test_sample = torch.from_numpy(preprocessed_data.test_x.reshape(1, 1, input_shape, input_shape).astype(np.float32))
+        model(test_sample)
 
 if __name__ == '__main__':
     pytest.main()

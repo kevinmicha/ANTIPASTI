@@ -1,8 +1,11 @@
 import numpy as np
 import torch
 
+from adabelief_pytorch import AdaBelief
 from sklearn.model_selection import train_test_split
 from torch.autograd import Variable
+
+from nmacnn.model.model import NormalModeAnalysisCNN
 
 def create_test_set(train_x, train_y, test_size=0.023):
     r"""Creates the test set given a set of input images and their corresponding labels.
@@ -173,9 +176,9 @@ def training_routine(model, criterion, optimiser, train_x, test_x, train_y, test
     Returns
     -------
     train_losses: list 
-        The history of training losses after the training step.
+        The history of training losses after the training routine.
     test_losses: list 
-        The history of test losses after the training step.
+        The history of test losses after the training routine.
     inter_filter: torch.Tensor
         Filters before the fully-connected layer.
     y_test: torch.Tensor
@@ -199,4 +202,66 @@ def training_routine(model, criterion, optimiser, train_x, test_x, train_y, test
     
     return train_losses, test_losses, inter_filter, y_test, output_test
 
+def load_checkpoint(path, input_shape):
+    r"""Loads a checkpoint from the ``checkpoints`` folder.
     
+    Parameters
+    ----------
+    path: str
+        Checkpoint path.
+    input_shape: int
+        Shape of the normal mode correlation maps.
+    
+    Returns
+    -------
+    model: nmacnn.model.model.NormalModeAnalysisCNN
+        The model class, i.e., ``NormalModeAnalysisCNN``.
+    optimiser: adabelief_pytorch.AdaBelief.AdaBelief
+        Method that implements an optimisation algorithm.
+    n_epochs: int
+        Number of times the whole dataset went through the model.
+    train_losses: list 
+        The history of training losses after the training routine.
+    test_losses: list 
+        The history of test losses after the training routine.
+
+    """  
+    model = NormalModeAnalysisCNN(input_shape=input_shape)
+    optimiser = AdaBelief(model.parameters(), eps=1e-8, print_change_log=False) 
+    checkpoint = torch.load(path)
+    model.load_state_dict(checkpoint['model_state_dict'])
+    optimiser.load_state_dict(checkpoint['optimiser_state_dict'])
+    n_epochs = checkpoint['epoch']
+    train_losses = checkpoint['tr_loss']
+    test_losses = checkpoint['test_loss']
+
+    return model, optimiser, n_epochs, train_losses, test_losses
+
+def save_checkpoint(path, model, optimiser, train_losses, test_losses):
+    r"""Saves a checkpoint in the ``checkpoints`` folder.
+    
+    Parameters
+    ----------
+    path: str
+        Checkpoint path.
+    model: nmacnn.model.model.NormalModeAnalysisCNN
+        The model class, i.e., ``NormalModeAnalysisCNN``.
+    optimiser: adabelief_pytorch.AdaBelief.AdaBelief
+        Method that implements an optimisation algorithm.
+    train_losses: list 
+        The history of training losses after the training routine.
+    test_losses: list 
+        The history of test losses after the training routine.
+
+    """  
+    EPOCH = len(test_losses)
+    TR_LOSS = train_losses
+    TEST_LOSS = test_losses
+
+    torch.save({
+                'epoch': EPOCH,
+                'model_state_dict': model.state_dict(),
+                'optimiser_state_dict': optimiser.state_dict(),
+                'tr_loss': TR_LOSS,
+                'test_loss': TEST_LOSS,            
+                }, path)

@@ -2,10 +2,8 @@ import argparse
 import numpy as np
 import torch
 
-from adabelief_pytorch import AdaBelief
-
-from nmacnn.model.model import NormalModeAnalysisCNN
 from nmacnn.preprocessing.preprocessing import Preprocessing
+from nmacnn.utils.torch_utils import load_checkpoint
 from config import CHECKPOINTS_DIR
 
 args = None
@@ -42,15 +40,8 @@ def main(args):
     input_shape = preprocessed_data.test_x.shape[-1]
     
     # Loading an NMA-CNN checkpoint
-    PATH = CHECKPOINTS_DIR + 'model_epochs_' + str(n_max_epochs) + '_modes_' + str(modes) + '_pool_' + str(pooling_size) + '_filters_' + str(n_filters) + '_size_' + str(filter_size) + '.pt'
-    model = NormalModeAnalysisCNN(input_shape=input_shape)
-    optimiser = AdaBelief(model.parameters(), eps=1e-8, print_change_log=False) 
-    checkpoint = torch.load(PATH)
-    model.load_state_dict(checkpoint['model_state_dict'])
-    optimiser.load_state_dict(checkpoint['optimiser_state_dict'])
-    epoch = checkpoint['epoch']
-    train_losses = checkpoint['tr_loss']
-    test_losses = checkpoint['test_loss']
+    path = CHECKPOINTS_DIR + 'model_epochs_' + str(n_max_epochs) + '_modes_' + str(modes) + '_pool_' + str(pooling_size) + '_filters_' + str(n_filters) + '_size_' + str(filter_size) + '.pt'
+    model = load_checkpoint(path, input_shape)[0]
     model.eval()
 
     # Predicting the binding affinity

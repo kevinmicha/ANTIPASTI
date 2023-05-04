@@ -1,13 +1,12 @@
 import argparse
 import numpy as np
-import torch
 
 from adabelief_pytorch import AdaBelief
 from torch.nn import MSELoss
 
 from nmacnn.model.model import NormalModeAnalysisCNN
 from nmacnn.preprocessing.preprocessing import Preprocessing
-from nmacnn.utils.torch_utils import create_test_set, training_routine
+from nmacnn.utils.torch_utils import create_test_set, save_checkpoint, training_routine
 from config import CHECKPOINTS_DIR
 
 args = None
@@ -69,18 +68,8 @@ def main(args):
     test_losses.extend(test_loss)
 
     ## Saving Neural Network checkpoint
-    EPOCH = len(test_losses)
-    PATH = CHECKPOINTS_DIR + 'model_epochs_' + str(n_max_epochs) + '_modes_' + str(modes) + '_pool_' + str(pooling_size) + '_filters_' + str(n_filters) + '_size_' + str(filter_size) + '.pt'
-    TR_LOSS = train_losses
-    TEST_LOSS = test_losses
-    
-    torch.save({
-                'epoch': EPOCH,
-                'model_state_dict': model.state_dict(),
-                'optimiser_state_dict': optimiser.state_dict(),
-                'tr_loss': TR_LOSS,
-                'test_loss': TEST_LOSS,            
-                }, PATH)
+    path = CHECKPOINTS_DIR + 'model_epochs_' + str(n_max_epochs) + '_modes_' + str(modes) + '_pool_' + str(pooling_size) + '_filters_' + str(n_filters) + '_size_' + str(filter_size) + '.pt'
+    save_checkpoint(path, model, optimiser, train_losses, test_losses)
 
 if __name__ == '__main__':
     main(arguments)
