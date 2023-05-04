@@ -4,6 +4,14 @@ nmacnn\.utils package
 Submodules
 ----------
 
+nmacnn.utils.explaining_utils module
+------------------------------------
+
+.. automodule:: nmacnn.utils.explaining_utils
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 nmacnn.utils.generic_utils module
 ---------------------------------
 
