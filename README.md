@@ -62,6 +62,7 @@ Example notebooks are located in the [notebooks](https://github.com/kevinmicha/p
 * [[Tutorial] Training NMA-CNN with paired HL](https://github.com/kevinmicha/predicting-affinity/blob/main/notebooks/%5BTutorial%5D%20Training%20NMA-CNN%20with%20paired%20HL.ipynb)
 * [[Tutorial] Predicting affinity using NMA-CNN with paired HL](https://github.com/kevinmicha/predicting-affinity/blob/main/notebooks/%5BTutorial%5D%20Predicting%20affinity%20using%20NMA-CNN%20with%20paired%20HL.ipynb)
 * [[Tutorial] Explaining affinity using NMA-CNN with paired HL](https://github.com/kevinmicha/predicting-affinity/blob/main/notebooks/%5BTutorial%5D%20Explaining%20affinity%20using%20NMA-CNN%20with%20paired%20HL.ipynb)
+* [[Analysis] AlphaFold can be useful if only sequences are available](https://github.com/kevinmicha/predicting-affinity/blob/main/notebooks/%5BAnalysis%5D%20AlphaFold%20can%20be%20useful%20if%20only%20sequences%20are%20available.ipynb)
 
 ## Attribution
 
