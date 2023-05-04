@@ -7,7 +7,6 @@ Subpackages
 .. toctree::
 
     nmacnn.model
-    nmacnn.plots
     nmacnn.preprocessing
     nmacnn.utils
 
