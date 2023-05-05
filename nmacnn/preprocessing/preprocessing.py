@@ -40,6 +40,8 @@ class Preprocessing(object):
         Filename extension of input structures.
     selection: str
         Considered portion of antibody chains.
+    regions: str
+        Choose between ``paired_hl`` (heavy chain, light chain and their interactions) and ``heavy`` (heavy chain only).
     pathological: list 
         PDB identifiers of antibodies that need to be excluded.
     renew_maps: bool
@@ -50,8 +52,10 @@ class Preprocessing(object):
         Choose between ``fully-cropped`` and ``fully-extended``.
     stage: str
         Choose between ``training`` and ``predicting``.
+    test_data_path: str
+        Path to the test data folder.
     test_dccm_map_path: str
-        Path to the testnormal mode correlation maps.
+        Path to the test normal mode correlation maps.
     test_residues_path: str
         Path to the folder containing the list of residues for a test sample.
     test_structures_path: str
@@ -75,11 +79,13 @@ class Preprocessing(object):
             residues_path='lists_of_residues/',
             file_type_input='.pdb',
             selection='_CDR1_to_CDR3',
+            regions='paired_hl',
             pathological=None,
             renew_maps=False,
             renew_residues=False,
             mode='fully-extended',
             stage='training',
+            test_data_path=None,
             test_dccm_map_path=None,
             test_residues_path=None,
             test_structure_path=None,
@@ -89,9 +95,10 @@ class Preprocessing(object):
         self.data_path = data_path
         self.scripts_path = scripts_path
         self.structures_path = structures_path
-        self.chain_lengths_path = data_path + chain_lengths_path
-        self.dccm_map_path = data_path + dccm_map_path
-        self.residues_path = data_path + residues_path
+        self.regions = regions
+        self.chain_lengths_path = data_path + self.regions + '/' + chain_lengths_path
+        self.dccm_map_path = data_path + self.regions + '/' + dccm_map_path
+        self.residues_path = data_path + self.regions + '/' + residues_path
         self.modes = modes
         self.file_type_input = file_type_input
         self.selection = selection
@@ -109,9 +116,10 @@ class Preprocessing(object):
         self.stage = stage
 
         if self.stage != 'training':
-            self.test_dccm_map_path = test_dccm_map_path
-            self.test_residues_path = test_residues_path
-            self.test_structure_path = test_structure_path
+            self.test_data_path = test_data_path
+            self.test_dccm_map_path = self.test_data_path + self.regions + '/' + test_dccm_map_path
+            self.test_residues_path = self.test_data_path + self.regions + '/' + test_residues_path
+            self.test_structure_path = self.test_data_path + test_structure_path
             self.test_pdb_id = test_pdb_id
             self.test_x = self.load_test_image()
 
@@ -192,7 +200,7 @@ class Preprocessing(object):
                 h_pos = start_chain
                 l_pos = start_chain
                 
-            if line.find(l_chain_key) != -1:
+            if line.find(l_chain_key) != -1 and self.regions == 'paired_hl':
                 l_pos = line.find(l_chain_key) + len(l_chain_key) + 1
                 l_chain = line[l_pos:l_pos+1]
             elif self.alphafold is False: 
@@ -392,7 +400,10 @@ class Preprocessing(object):
         assert list(np.load(self.chain_lengths_path+'selected_entries.npy')) == selected_entries
 
         for entry in selected_entries:
-            assert len(np.load(self.residues_path+entry+'.npy'))-2 == heavy[selected_entries.index(entry)] + light[selected_entries.index(entry)]
+            if self.regions == 'paired_hl':
+                assert len(np.load(self.residues_path+entry+'.npy'))-2 == heavy[selected_entries.index(entry)] + light[selected_entries.index(entry)]
+            else:
+                assert len(np.load(self.residues_path+entry+'.npy'))-2 == heavy[selected_entries.index(entry)]
 
         return heavy, light, selected_entries
 
@@ -458,9 +469,6 @@ class Preprocessing(object):
             idx_list += [i+max_res_h for i in range(max_res_l) if self.max_res_list_l[i] in current_list_l]
             for k, i in enumerate(idx_list):
                 for l, j in enumerate(idx_list):
-                    #if i in range(120) and j in range(120,215) or i in range(120,215) and j in range(120):
-                    #    masked[i, j] = 0
-                    #else:    
                     masked[i, j] = img[k, l]
                     mask[i, j] = 1
 
