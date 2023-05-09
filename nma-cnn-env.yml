@@ -4,7 +4,7 @@ channels:
   - defaults
 dependencies:
   - matplotlib>=3.6.2
-  - mdtraj>=1.9.6
+  #- mdtraj>=1.9.6
   - numpy>=1.23.3
   - pandas>=1.3.2
   - pip>=23.1.2
