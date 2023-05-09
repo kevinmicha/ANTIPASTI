@@ -14,6 +14,6 @@ dependencies:
   - tqdm>=4.49.0
   - pip:
     - adabelief-pytorch>=0.2.1
-    - contact-map>=0.7.0
+    #- contact-map>=0.7.0
     - opencv-python>=4.7.0.68
     - torch>=1.13.1

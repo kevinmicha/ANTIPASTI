@@ -1,5 +1,4 @@
 adabelief-pytorch>=0.2.1
-contact-map>=0.7.0
 matplotlib>=3.6.2
 numpy>=1.23.3
 opencv-python>=4.7.0.68
