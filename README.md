@@ -1,6 +1,6 @@
 # Predicting and explaining antibody binding affinity with Deep Learning and Normal Mode Analysis
 
-[![Python 3.8 3.9 3.10](https://img.shields.io/badge/python-3.8%20%7C%203.9%20%7C%203.10-blue)](https://www.python.org/downloads/release/python-3100/)
+[![Python 3.8 - 3.11](https://img.shields.io/badge/Python-3.8%20--%203.11-blue)](https://www.python.org/downloads/release/python-3113/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green)](https://opensource.org/license/mit/)
 [![Tests](https://github.com/kevinmicha/predicting-affinity/actions/workflows/tests.yml/badge.svg)](https://github.com/kevinmicha/predicting-affinity/actions/workflows/tests.yml)
 [![Docs](https://github.com/kevinmicha/predicting-affinity/actions/workflows/documentation.yml/badge.svg)](https://kevinmicha.github.io/predicting-affinity/index.html)
