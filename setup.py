@@ -20,6 +20,6 @@ setup(
     author_email='k.michalewicz22@imperial.ac.uk',
     description='Deep Learning model that predicts the binding affinity of antibodies from their sequence and three-dimensional structure.',
     packages=['nmacnn', 'nmacnn.model', 'nmacnn.preprocessing', 'nmacnn.utils'],
-    install_requires=['adabelief-pytorch', 'contact-map', 'matplotlib', 'mdtraj', 'numpy', 'opencv-python', 'pandas', 'scikit-learn', 'torch', 'torchmetrics', 'tqdm'],
+    install_requires=['adabelief-pytorch', 'contact-map', 'matplotlib', 'numpy', 'opencv-python', 'pandas', 'scikit-learn', 'torch', 'torchmetrics', 'tqdm'],
     cmdclass={'test': PyTest}
 )
