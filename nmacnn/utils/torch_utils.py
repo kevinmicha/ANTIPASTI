@@ -118,7 +118,7 @@ def training_step(model, criterion, optimiser, train_x, test_x, train_y, test_y,
         inter_filter[i:i+batch_size] = inter_filters.detach().numpy()
 
         # Training loss, clearing gradients and updating weights
-        loss_train = criterion(output_train, batch_y)
+        loss_train = criterion(output_train[:, 0], batch_y[:, 0])
         optimiser.zero_grad()
         loss_train.backward()
         optimiser.step()    
@@ -131,7 +131,7 @@ def training_step(model, criterion, optimiser, train_x, test_x, train_y, test_y,
     output_test, _ = model(x_test)
     for i in range(x_test.size()[0]):
         output_t, _ = model(x_test[i].reshape(1, 1, model.input_shape, model.input_shape))
-        loss_t = criterion(output_t, y_test[i])
+        loss_t = criterion(output_t[:, 0], y_test[i][:, 0])
         loss_test += loss_t / x_test.size()[0]
         if verbose:
             print(output_t)
@@ -226,10 +226,18 @@ def load_checkpoint(path, input_shape):
         The history of test losses after the training routine.
 
     """  
-    model = NormalModeAnalysisCNN(input_shape=input_shape)
-    optimiser = AdaBelief(model.parameters(), eps=1e-8, print_change_log=False) 
+    # Extracting parameters
+    if path.endswith('_test.pt'):
+        model = NormalModeAnalysisCNN(input_shape=input_shape)
+    else:
+        n_filters = int(path.partition('_filters_')[-1][0])
+        pooling_size = int(path.partition('_pool_')[-1][0])
+        filter_size = int(path.partition('_size_')[-1][0])
+        model = NormalModeAnalysisCNN(n_filters=n_filters, pooling_size=pooling_size, filter_size=filter_size, input_shape=input_shape)
+   
     checkpoint = torch.load(path)
     model.load_state_dict(checkpoint['model_state_dict'])
+    optimiser = AdaBelief(model.parameters(), eps=1e-8, print_change_log=False) 
     optimiser.load_state_dict(checkpoint['optimiser_state_dict'])
     n_epochs = checkpoint['epoch']
     train_losses = checkpoint['tr_loss']

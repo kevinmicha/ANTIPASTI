@@ -7,7 +7,7 @@ r"""This module contains the model class.
 """
 
 import torch
-from torch.nn import Linear, ReLU, Conv2d, MaxPool2d, Module
+from torch.nn import Linear, ReLU, Conv2d, MaxPool2d, Module, Dropout
 
 class NormalModeAnalysisCNN(Module):
     r"""Predicting the binding affinity of an antibody from its normal mode correlation map.
@@ -39,6 +39,7 @@ class NormalModeAnalysisCNN(Module):
         self.fully_connected_input = n_filters * ((input_shape-filter_size+1)//pooling_size) ** 2
         self.conv1 = Conv2d(1, n_filters, filter_size)
         self.pool = MaxPool2d(pooling_size, pooling_size)
+        self.dropit = Dropout(p=0.05)
         self.relu = ReLU()
         self.fc1 = Linear(self.fully_connected_input, 1, bias=False)
 
@@ -54,9 +55,11 @@ class NormalModeAnalysisCNN(Module):
             
         """
         x = self.conv1(x) + torch.transpose(self.conv1(x), 2, 3)
+        x = self.relu(x)
         x = self.pool(x)
         inter = x = self.relu(x)
         x = x.view(x.size(0), -1)
+        x = self.dropit(x)
         x = self.fc1(x)
 
         return x.float(), inter
