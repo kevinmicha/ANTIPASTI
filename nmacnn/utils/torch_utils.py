@@ -202,7 +202,7 @@ def training_routine(model, criterion, optimiser, train_x, test_x, train_y, test
     
     return train_losses, test_losses, inter_filter, y_test, output_test
 
-def load_checkpoint(path, input_shape):
+def load_checkpoint(path, input_shape, n_filters=None, pooling_size=None, filter_size=None):
     r"""Loads a checkpoint from the ``checkpoints`` folder.
     
     Parameters
@@ -211,6 +211,12 @@ def load_checkpoint(path, input_shape):
         Checkpoint path.
     input_shape: int
         Shape of the normal mode correlation maps.
+    n_filters: int
+        Number of filters in the convolutional layer.
+    filter_size: int
+        Size of filters in the convolutional layer.
+    pooling_size: int
+        Size of the max pooling operation.
     
     Returns
     -------
@@ -230,18 +236,29 @@ def load_checkpoint(path, input_shape):
     if path.endswith('_test.pt'):
         model = NormalModeAnalysisCNN(input_shape=input_shape)
     else:
-        n_filters = int(path.partition('_filters_')[-1][0])
-        pooling_size = int(path.partition('_pool_')[-1][0])
-        filter_size = int(path.partition('_size_')[-1][0])
-        model = NormalModeAnalysisCNN(n_filters=n_filters, pooling_size=pooling_size, filter_size=filter_size, input_shape=input_shape)
-   
+        if n_filters is None:
+            nf = int(path.partition('_filters_')[-1][0])
+            ps = int(path.partition('_pool_')[-1][0])
+            fs = int(path.partition('_size_')[-1][0])
+        else:
+            nf = n_filters
+            ps = pooling_size
+            fs = filter_size
+        model = NormalModeAnalysisCNN(n_filters=nf, pooling_size=ps, filter_size=fs, input_shape=input_shape)
+
     checkpoint = torch.load(path)
     model.load_state_dict(checkpoint['model_state_dict'])
     optimiser = AdaBelief(model.parameters(), eps=1e-8, print_change_log=False) 
-    optimiser.load_state_dict(checkpoint['optimiser_state_dict'])
+    if 'optimiser_state_dict' in checkpoint:
+        optimiser.load_state_dict(checkpoint['optimiser_state_dict'])
+    else:
+        optimiser.load_state_dict(checkpoint['optimizer_state_dict'])
     n_epochs = checkpoint['epoch']
     train_losses = checkpoint['tr_loss']
-    test_losses = checkpoint['test_loss']
+    if 'test_loss' in checkpoint:
+        test_losses = checkpoint['test_loss']
+    else:
+        test_losses = checkpoint['val_loss']
 
     return model, optimiser, n_epochs, train_losses, test_losses
 
