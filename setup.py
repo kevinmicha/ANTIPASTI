@@ -14,12 +14,12 @@ class PyTest(TestCommand):
         sys.exit(errno)
 
 setup(
-    name='NMA-CNN',
+    name='ANTIPASTI',
     version='1.0',
     author='Kevin Michalewicz',
     author_email='k.michalewicz22@imperial.ac.uk',
     description='Deep Learning model that predicts the binding affinity of antibodies from their sequence and three-dimensional structure.',
-    packages=['nmacnn', 'nmacnn.model', 'nmacnn.preprocessing', 'nmacnn.utils'],
+    packages=['antipasti', 'antipasti.model', 'antipasti.preprocessing', 'antipasti.utils'],
     install_requires=['adabelief-pytorch', 'matplotlib', 'numpy', 'opencv-python', 'pandas', 'scikit-learn', 'torch', 'torchmetrics', 'tqdm'],
     cmdclass={'test': PyTest}
 )

@@ -1,13 +1,13 @@
-nmacnn\.model package
+antipasti\.model package
 =====================
 
 Submodules
 ----------
 
-nmacnn.model.model module
+antipasti.model.model module
 -------------------------
 
-.. automodule:: nmacnn.model.model
+.. automodule:: antipasti.model.model
     :members:
     :undoc-members:
     :show-inheritance:
@@ -15,7 +15,7 @@ nmacnn.model.model module
 Module contents
 ---------------
 
-.. automodule:: nmacnn.model
+.. automodule:: antipasti.model
     :members:
     :undoc-members:
     :show-inheritance:

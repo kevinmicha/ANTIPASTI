@@ -18,7 +18,7 @@ autodoc_mock_imports = ['adabelief_pytorch', 'cv2', 'numpy', 'pandas', 'sklearn'
 
 # -- Project information -----------------------------------------------------
 
-project = u'NMA-CNN'
+project = u'ANTIPASTI'
 copyright = u'2023, Kevin Michalewicz et al'
 author = u'Kevin Michalewicz, Barbara Bravi, Mauricio Barahona'
 
@@ -89,7 +89,7 @@ html_sidebars = {
 # -- Options for HTMLHelp output ------------------------------------------
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'NMA-CNNdoc'
+htmlhelp_basename = 'ANTIPASTIdoc'
 
 
 
@@ -117,7 +117,7 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, 'NMA-CNN.tex', u'NMA-CNN Documentation',
+    (master_doc, 'ANTIPASTI.tex', u'ANTIPASTI Documentation',
      u'Kevin Michalewicz, Barbara Bravi, Mauricio Barahona', 'manual'),
 ]
 
@@ -127,7 +127,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, 'nmacnn', u'NMA-CNN Documentation',
+    (master_doc, 'antipasti', u'ANTIPASTI Documentation',
      [author], 1)
 ]
 
@@ -138,8 +138,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    (master_doc, 'NMA-CNN', u'NMA-CNN Documentation',
-     author, 'NMA-CNN', 'Deep Learning model that predicts the binding affinity of antibodies from their sequence and three-dimensional structure.',
+    (master_doc, 'ANTIPASTI', u'ANTIPASTI Documentation',
+     author, 'ANTIPASTI', 'Deep Learning model that predicts the binding affinity of antibodies from their sequence and three-dimensional structure.',
      'Miscellaneous'),
 ]
 

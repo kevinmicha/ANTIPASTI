@@ -5,10 +5,10 @@ import unittest
 from adabelief_pytorch import AdaBelief
 from torch.nn import MSELoss
 
-from nmacnn.model.model import NormalModeAnalysisCNN
-from nmacnn.preprocessing.preprocessing import Preprocessing
-from nmacnn.utils.torch_utils import create_test_set, save_checkpoint, training_routine
-from nmacnn.config import CHECKPOINTS_DIR
+from antipasti.model.model import ANTIPASTI
+from antipasti.preprocessing.preprocessing import Preprocessing
+from antipasti.utils.torch_utils import create_test_set, save_checkpoint, training_routine
+from antipasti.config import CHECKPOINTS_DIR
 from tests import TEST_PATH
 
 class TestTraining(unittest.TestCase):
@@ -33,7 +33,7 @@ class TestTraining(unittest.TestCase):
         batch_size = 1
         input_shape = preprocessed_data.train_x.shape[-1]
 
-        model = NormalModeAnalysisCNN(n_filters=n_filters, filter_size=filter_size, pooling_size=pooling_size, input_shape=input_shape)
+        model = ANTIPASTI(n_filters=n_filters, filter_size=filter_size, pooling_size=pooling_size, input_shape=input_shape)
         criterion = MSELoss()
         optimiser = AdaBelief(model.parameters(), lr=learning_rate, eps=1e-8, print_change_log=False) 
 
@@ -62,7 +62,7 @@ class TestTraining(unittest.TestCase):
         batch_size = 1
         input_shape = preprocessed_data.train_x.shape[-1]
 
-        model = NormalModeAnalysisCNN(n_filters=n_filters, filter_size=filter_size, pooling_size=pooling_size, input_shape=input_shape)
+        model = ANTIPASTI(n_filters=n_filters, filter_size=filter_size, pooling_size=pooling_size, input_shape=input_shape)
         criterion = MSELoss()
         optimiser = AdaBelief(model.parameters(), lr=learning_rate, eps=1e-8, print_change_log=False) 
 

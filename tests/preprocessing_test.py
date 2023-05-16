@@ -2,7 +2,7 @@ import os
 import pytest
 import unittest
 
-from nmacnn.preprocessing.preprocessing import Preprocessing
+from antipasti.preprocessing.preprocessing import Preprocessing
 from tests import TEST_PATH
 
 class TestPreprocessing(unittest.TestCase):

@@ -1,6 +1,6 @@
 # Authors credits
 
-## NMA-CNN
+## ANTIPASTI
 
 Core developer:
 

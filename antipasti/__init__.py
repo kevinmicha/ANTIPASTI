@@ -1,4 +1,4 @@
-# Adding the NMA-CNN package to sys path so submodules can be called directly
+# Adding the ANTIPASTI package to sys path so submodules can be called directly
 
 import inspect
 import os

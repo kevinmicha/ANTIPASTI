@@ -1,29 +1,29 @@
-nmacnn\.utils package
+antipasti\.utils package
 =====================
 
 Submodules
 ----------
 
-nmacnn.utils.explaining_utils module
+antipasti.utils.explaining_utils module
 ------------------------------------
 
-.. automodule:: nmacnn.utils.explaining_utils
+.. automodule:: antipasti.utils.explaining_utils
     :members:
     :undoc-members:
     :show-inheritance:
 
-nmacnn.utils.generic_utils module
+antipasti.utils.generic_utils module
 ---------------------------------
 
-.. automodule:: nmacnn.utils.generic_utils
+.. automodule:: antipasti.utils.generic_utils
     :members:
     :undoc-members:
     :show-inheritance:
 
-nmacnn.utils.torch_utils module
+antipasti.utils.torch_utils module
 -------------------------------
 
-.. automodule:: nmacnn.utils.torch_utils
+.. automodule:: antipasti.utils.torch_utils
     :members:
     :undoc-members:
     :show-inheritance:
@@ -31,7 +31,7 @@ nmacnn.utils.torch_utils module
 Module contents
 ---------------
 
-.. automodule:: nmacnn.utils
+.. automodule:: antipasti.utils
     :members:
     :undoc-members:
     :show-inheritance:

@@ -1,4 +1,4 @@
-nmacnn package
+antipasti package
 ==============
 
 Subpackages
@@ -6,15 +6,15 @@ Subpackages
 
 .. toctree::
 
-    nmacnn.model
-    nmacnn.preprocessing
-    nmacnn.utils
+    antipasti.model
+    antipasti.preprocessing
+    antipasti.utils
 
 
 Module contents
 ---------------
 
-.. automodule:: nmacnn
+.. automodule:: antipasti
     :members:
     :undoc-members:
     :show-inheritance:

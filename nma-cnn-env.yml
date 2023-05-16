@@ -1,4 +1,4 @@
-name: nma-cnn-env
+name: antipasti-env
 channels:
   - conda-forge
   - defaults

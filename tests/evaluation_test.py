@@ -4,8 +4,8 @@ import pytest
 import torch
 import unittest
 
-from nmacnn.preprocessing.preprocessing import Preprocessing
-from nmacnn.utils.torch_utils import load_checkpoint
+from antipasti.preprocessing.preprocessing import Preprocessing
+from antipasti.utils.torch_utils import load_checkpoint
 
 from tests import TEST_PATH
 

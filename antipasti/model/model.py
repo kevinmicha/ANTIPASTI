@@ -9,7 +9,7 @@ r"""This module contains the model class.
 import torch
 from torch.nn import Linear, ReLU, Conv2d, MaxPool2d, Module, Dropout
 
-class NormalModeAnalysisCNN(Module):
+class ANTIPASTI(Module):
     r"""Predicting the binding affinity of an antibody from its normal mode correlation map.
 
     Parameters
@@ -31,7 +31,7 @@ class NormalModeAnalysisCNN(Module):
             pooling_size=1,
             input_shape=215,
     ):
-        super(NormalModeAnalysisCNN, self).__init__()
+        super(ANTIPASTI, self).__init__()
         self.n_filters = n_filters
         self.filter_size = filter_size
         self.pooling_size = pooling_size

@@ -1,13 +1,13 @@
-nmacnn\.preprocessing package
+antipasti\.preprocessing package
 =============================
 
 Submodules
 ----------
 
-nmacnn.preprocessing.preprocessing module
+antipasti.preprocessing.preprocessing module
 -----------------------------------------
 
-.. automodule:: nmacnn.preprocessing.preprocessing
+.. automodule:: antipasti.preprocessing.preprocessing
     :members:
     :undoc-members:
     :show-inheritance:
@@ -15,7 +15,7 @@ nmacnn.preprocessing.preprocessing module
 Module contents
 ---------------
 
-.. automodule:: nmacnn.preprocessing
+.. automodule:: antipasti.preprocessing
     :members:
     :undoc-members:
     :show-inheritance:

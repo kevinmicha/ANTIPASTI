@@ -2,8 +2,8 @@ import argparse
 import numpy as np
 import torch
 
-from nmacnn.preprocessing.preprocessing import Preprocessing
-from nmacnn.utils.torch_utils import load_checkpoint
+from antipasti.preprocessing.preprocessing import Preprocessing
+from antipasti.utils.torch_utils import load_checkpoint
 from config import CHECKPOINTS_DIR
 
 args = None
@@ -40,7 +40,7 @@ def main(args):
     preprocessed_data = Preprocessing(modes=modes, regions=regions, pathological=pathological, stage=stage, test_data_path=test_data_path, test_dccm_map_path=test_dccm_map_path, test_residues_path=test_residues_path, test_structure_path=test_structure_path)
     input_shape = preprocessed_data.test_x.shape[-1]
     
-    # Loading an NMA-CNN checkpoint
+    # Loading an ANTIPASTI checkpoint
     path = CHECKPOINTS_DIR + 'model_' + regions + '_epochs_' + str(n_max_epochs) + '_modes_' + str(modes) + '_pool_' + str(pooling_size) + '_filters_' + str(n_filters) + '_size_' + str(filter_size) + '.pt'
     model = load_checkpoint(path, input_shape)[0]
     model.eval()

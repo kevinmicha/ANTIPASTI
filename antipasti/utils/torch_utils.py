@@ -5,7 +5,7 @@ from adabelief_pytorch import AdaBelief
 from sklearn.model_selection import train_test_split
 from torch.autograd import Variable
 
-from nmacnn.model.model import NormalModeAnalysisCNN
+from antipasti.model.model import ANTIPASTI
 
 def create_test_set(train_x, train_y, test_size=0.023):
     r"""Creates the test set given a set of input images and their corresponding labels.
@@ -55,8 +55,8 @@ def training_step(model, criterion, optimiser, train_x, test_x, train_y, test_y,
     
     Parameters
     ----------
-    model: nmacnn.model.model.NormalModeAnalysisCNN
-        The model class, i.e., ``NormalModeAnalysisCNN``.
+    model: antipasti.model.model.ANTIPASTI
+        The model class, i.e., ``ANTIPASTI``.
     criterion: torch.nn.modules.loss.MSELoss
         It calculates a gradient according to a selected loss function, i.e., ``MSELoss``.
     optimiser: adabelief_pytorch.AdaBelief.AdaBelief
@@ -150,8 +150,8 @@ def training_routine(model, criterion, optimiser, train_x, test_x, train_y, test
     
     Parameters
     ----------
-    model: nmacnn.model.model.NormalModeAnalysisCNN
-        The model class, i.e., ``NormalModeAnalysisCNN``.
+    model: antipasti.model.model.ANTIPASTI
+        The model class, i.e., ``ANTIPASTI``.
     criterion: torch.nn.modules.loss.MSELoss
         It calculates a gradient according to a selected loss function, i.e., ``MSELoss``.
     optimiser: adabelief_pytorch.AdaBelief.AdaBelief
@@ -220,8 +220,8 @@ def load_checkpoint(path, input_shape, n_filters=None, pooling_size=None, filter
     
     Returns
     -------
-    model: nmacnn.model.model.NormalModeAnalysisCNN
-        The model class, i.e., ``NormalModeAnalysisCNN``.
+    model: antipasti.model.model.ANTIPASTI
+        The model class, i.e., ``ANTIPASTI``.
     optimiser: adabelief_pytorch.AdaBelief.AdaBelief
         Method that implements an optimisation algorithm.
     n_epochs: int
@@ -234,7 +234,7 @@ def load_checkpoint(path, input_shape, n_filters=None, pooling_size=None, filter
     """  
     # Extracting parameters
     if path.endswith('_test.pt'):
-        model = NormalModeAnalysisCNN(input_shape=input_shape)
+        model = ANTIPASTI(input_shape=input_shape)
     else:
         if n_filters is None:
             nf = int(path.partition('_filters_')[-1][0])
@@ -244,7 +244,7 @@ def load_checkpoint(path, input_shape, n_filters=None, pooling_size=None, filter
             nf = n_filters
             ps = pooling_size
             fs = filter_size
-        model = NormalModeAnalysisCNN(n_filters=nf, pooling_size=ps, filter_size=fs, input_shape=input_shape)
+        model = ANTIPASTI(n_filters=nf, pooling_size=ps, filter_size=fs, input_shape=input_shape)
 
     checkpoint = torch.load(path)
     model.load_state_dict(checkpoint['model_state_dict'])
@@ -269,8 +269,8 @@ def save_checkpoint(path, model, optimiser, train_losses, test_losses):
     ----------
     path: str
         Checkpoint path.
-    model: nmacnn.model.model.NormalModeAnalysisCNN
-        The model class, i.e., ``NormalModeAnalysisCNN``.
+    model: antipasti.model.model.ANTIPASTI
+        The model class, i.e., ``ANTIPASTI``.
     optimiser: adabelief_pytorch.AdaBelief.AdaBelief
         Method that implements an optimisation algorithm.
     train_losses: list 

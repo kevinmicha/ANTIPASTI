@@ -9,7 +9,7 @@ def get_maps_of_interest(preprocessed_data, learnt_filter, affinity_thr=-8):
 
     Parameters
     ----------
-    preprocessed_data: nmacnn.model.model.Preprocessing
+    preprocessed_data: antipasti.model.model.Preprocessing
         The ``Preprocessing`` class.
     learnt_filter: numpy.ndarray
         Filters that express the learnt features during training.
@@ -50,10 +50,10 @@ def get_epsilon(preprocessed_data, model, mean_diff_image):
 
     Parameters
     ----------
-    preprocessed_data: nmacnn.model.model.Preprocessing
+    preprocessed_data: antipasti.model.model.Preprocessing
         The ``Preprocessing`` class.
-    model: nmacnn.model.model.NormalModeAnalysisCNN
-        The model class, i.e., ``NormalModeAnalysisCNN``.
+    model: antipasti.model.model.ANTIPASTI
+        The model class, i.e., ``ANTIPASTI``.
     mean_diff_image: numpy.ndarray
         Map resulting from the subtraction of the mean of the high affinity correlation maps and the mean of the low affinity correlation maps.
 
@@ -84,7 +84,7 @@ def map_residues_to_regions(preprocessed_data, epsilon):
 
     Parameters
     ----------
-    preprocessed_data: nmacnn.model.model.Preprocessing
+    preprocessed_data: antipasti.model.model.Preprocessing
         The ``Preprocessing`` class.
     epsilon: numpy.ndarray
         A map ``epsilon`` (ϵ) such that the predicted affinity of x + ϵ is always greater than that of x.
@@ -148,10 +148,10 @@ def compute_change_in_kd(preprocessed_data, model, weights, coord, maps):
 
     Parameters
     ----------
-    preprocessed_data: nmacnn.model.model.Preprocessing
+    preprocessed_data: antipasti.model.model.Preprocessing
         The ``Preprocessing`` class.
-    model: nmacnn.model.model.NormalModeAnalysisCNN
-        The model class, i.e., ``NormalModeAnalysisCNN``.
+    model: antipasti.model.model.ANTIPASTI
+        The model class, i.e., ``ANTIPASTI``.
     weights: numpy.ndarray
         The weights given to each antibody region.
     coord: numpy.ndarray
