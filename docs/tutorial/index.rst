@@ -1,7 +1,7 @@
 Tutorial
 ========
 
-You can follow the example notebooks to learn how to use the core functionnality of ANTIPASTI:
+You can follow the example notebooks to learn how to use the core functionality of ANTIPASTI:
 
 - `[Tutorial] Training ANTIPASTI <https://github.com/kevinmicha/ANTIPASTI/blob/main/notebooks/%5BTutorial%5D%20Training%20ANTIPASTI.ipynb>`_
 

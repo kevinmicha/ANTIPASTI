@@ -15,7 +15,7 @@ About
 
 ANTIPASTI (ANTIbodies - Predicting Affinity from STructural Information) is a Deep Learning model that predicts the binding affinity of antibodies from their sequence and three-dimensional structure. The `repository is on GitHub <https://github.com/kevinmicha/ANTIPASTI>`_.
 
-You can follow the `example notebooks <https://github.com/kevinmicha/ANTIPASTI/tree/main/notebooks>`_ to learn how to use the core functionnality of ANTIPASTI
+You can follow the `example notebooks <https://github.com/kevinmicha/ANTIPASTI/tree/main/notebooks>`_ to learn how to use the core functionality of ANTIPASTI
 
 If you have already read our :doc:`paper<citing>`, you might want to proceed with the :doc:`installation` or the :doc:`Tutorial <tutorial/index>`.
 
