@@ -516,8 +516,8 @@ class Preprocessing(object):
             h, l, _ = self.get_lists_of_lengths(selected_entries=str(pdb_id.removesuffix('_af')).split())
             h = h[0] 
             l = l[0] 
-            hupsymchain = 26 + h + 1
-            lupsymchain = 24 + l + 1
+            hupsymchain = 26 + h 
+            lupsymchain = 24 + l
             lresidues = False
         else:
             hupsymchain = None

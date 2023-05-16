@@ -33,7 +33,8 @@ def create_test_set(train_x, train_y, test_size=0.023):
     """
 
     # Splitting
-    train_x, test_x, train_y, test_y = train_test_split(train_x, train_y, test_size=test_size, random_state=9)
+    indices = np.arange(len(train_x))
+    train_x, test_x, train_y, test_y, indices_train, indices_test = train_test_split(train_x, train_y, indices, test_size=test_size, random_state=9)
 
     # Converting to tensors
     train_x = train_x.reshape(train_x.shape[0], 1, train_x.shape[1], train_x.shape[1])
@@ -48,7 +49,7 @@ def create_test_set(train_x, train_y, test_size=0.023):
     test_y = test_y.astype(np.float32).reshape(test_y.shape[0], 1, 1)
     test_y = torch.from_numpy(test_y)
 
-    return train_x, test_x, train_y, test_y
+    return train_x, test_x, train_y, test_y, indices_train, indices_test
 
 def training_step(model, criterion, optimiser, train_x, test_x, train_y, test_y, train_losses, test_losses, epoch, batch_size, verbose):
     r"""Performs a training step.

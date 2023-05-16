@@ -22,7 +22,7 @@ class TestTraining(unittest.TestCase):
 
     def test_training_paired_hl(self):
         preprocessed_data = Preprocessing(data_path=self.data_path, structures_path=self.structures_path, scripts_path=self.scripts_path, df=self.df, pathological=self.pathological)
-        train_x, test_x, train_y, test_y = create_test_set(preprocessed_data.train_x, preprocessed_data.train_y, test_size=0.5)
+        train_x, test_x, train_y, test_y, _, _ = create_test_set(preprocessed_data.train_x, preprocessed_data.train_y, test_size=0.5)
 
         n_filters = 2
         filter_size = 5
@@ -51,7 +51,7 @@ class TestTraining(unittest.TestCase):
 
     def test_training_heavy(self):
         preprocessed_data = Preprocessing(data_path=self.data_path, structures_path=self.structures_path, scripts_path=self.scripts_path, df=self.df, regions='heavy', pathological=self.pathological)
-        train_x, test_x, train_y, test_y = create_test_set(preprocessed_data.train_x, preprocessed_data.train_y, test_size=0.5)
+        train_x, test_x, train_y, test_y, _, _ = create_test_set(preprocessed_data.train_x, preprocessed_data.train_y, test_size=0.5)
 
         n_filters = 3
         filter_size = 5

@@ -46,7 +46,7 @@ def main(args):
 
     # Preprocessing and creating the test set
     preprocessed_data = Preprocessing(modes=modes, regions=regions, pathological=pathological, renew_maps=False, renew_residues=False)
-    train_x, test_x, train_y, test_y = create_test_set(preprocessed_data.train_x, preprocessed_data.train_y, test_size=0.023)
+    train_x, test_x, train_y, test_y, _, _ = create_test_set(preprocessed_data.train_x, preprocessed_data.train_y, test_size=0.023)
     input_shape = preprocessed_data.train_x.shape[-1]
     
     # Defining the model, criterion and optimiser
