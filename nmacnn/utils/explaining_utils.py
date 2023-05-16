@@ -71,8 +71,8 @@ def get_epsilon(preprocessed_data, model, mean_diff_image):
         inter_filter_item = model(torch.from_numpy(train_x[j].reshape(1, 1, input_shape, input_shape).astype(np.float32)))[1].detach().numpy()
         for i in range(n_filters):
             each_img_enl[j] += cv2.resize(np.multiply(inter_filter_item[0,i], model.fc1.weight.data.numpy().reshape(n_filters, size_le**2)[i].reshape(size_le, size_le)), dsize=(input_shape, input_shape))
-        high_aff.append(np.multiply(-np.clip(each_img_enl[j], a_min=-np.inf, a_max=0), cv2.resize(train_x[j], dsize=(input_shape, input_shape))))
-        low_aff.append(np.multiply(np.clip(each_img_enl[j], a_min=0, a_max=np.inf), cv2.resize(train_x[j], dsize=(input_shape, input_shape))))
+        high_aff.append(np.multiply(-np.clip(each_img_enl[j], a_min=-np.inf, a_max=0), train_x[j]))
+        low_aff.append(np.multiply(np.clip(each_img_enl[j], a_min=0, a_max=np.inf), train_x[j]))
 
     true_filter = deepcopy(np.mean(high_aff, axis=0) - np.mean(low_aff, axis=0))
     epsilon = np.multiply(np.abs(np.sign(mean_diff_image[0])), true_filter)
