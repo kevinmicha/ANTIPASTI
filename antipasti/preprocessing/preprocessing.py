@@ -64,6 +64,10 @@ class Preprocessing(object):
         Test PDB ID.
     alphafold: bool
         ``True`` the test structure was folded using ``AlphaFold``.
+    h_offset: int
+        Amount of absent residues between positions 1 and 25 in the heavy chain.
+    l_offset: int
+        Amount of absent residues between positions 1 and 23 in the light chain.
 
     """
 
@@ -91,6 +95,8 @@ class Preprocessing(object):
             test_structure_path=None,
             test_pdb_id='1t66',
             alphafold=False,
+            h_offset=0,
+            l_offset=0,
     ):
         self.data_path = data_path
         self.scripts_path = scripts_path
@@ -117,6 +123,8 @@ class Preprocessing(object):
 
         if self.stage != 'training':
             self.test_data_path = test_data_path
+            self.h_offset = h_offset
+            self.l_offset = l_offset
             self.test_dccm_map_path = self.test_data_path + self.regions + '/' + test_dccm_map_path
             self.test_residues_path = self.test_data_path + self.regions + '/' + test_residues_path
             self.test_structure_path = self.test_data_path + test_structure_path
@@ -195,8 +203,8 @@ class Preprocessing(object):
                 h_chain = 'A' 
                 l_chain = 'B'
                 idx_list = [0]
-                h_range = range(26, hupsymchain)
-                l_range = range(24, lupsymchain)
+                h_range = range(26-self.h_chain, hupsymchain-self.h_chain)
+                l_range = range(24-self.l_chain, lupsymchain-self.l_chain)
                 h_pos = start_chain
                 l_pos = start_chain
                 
@@ -246,7 +254,9 @@ class Preprocessing(object):
         # List with name of every residue is saved if selected
         if lresidues == True:
             list_residues.append('END')
-            np.save(rpath + path[-8:-4] + '.npy', list_residues)
+            saving_path = rpath + path[-8:-4] + '.npy'
+            if not os.path.isfile(saving_path):
+                np.save(saving_path, list_residues)
                                         
         # Creating new file
         with open(new_path, 'w') as f_new:
