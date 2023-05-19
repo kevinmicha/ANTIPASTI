@@ -538,7 +538,7 @@ class Preprocessing(object):
         file_name = pdb_id + self.selection
         path = self.test_structure_path + file_name + self.file_type_input
         new_path = self.test_dccm_map_path + pdb_id
-        if not os.path.exists(new_path):
+        if not os.path.exists(new_path+'.npy'):
             self.generate_cdr1_to_cdr3_pdb(self.test_structure_path+pdb_id+self.file_type_input, lresidues=lresidues, hupsymchain=hupsymchain, lupsymchain=lupsymchain) 
             subprocess.call(['/usr/local/bin/RScript '+str(self.scripts_path)+'pdb_to_dccm.r '+str(path)+' '+str(new_path)+' '+str(self.modes)], shell=True, stdout=open(os.devnull, 'wb'))
             if os.path.exists(path):
