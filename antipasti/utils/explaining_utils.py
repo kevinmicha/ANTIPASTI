@@ -11,7 +11,7 @@ def get_maps_of_interest(preprocessed_data, learnt_filter, affinity_thr=-8):
 
     Parameters
     ----------
-    preprocessed_data: antipasti.model.model.Preprocessing
+    preprocessed_data: antipasti.preprocessing.preprocessing.Preprocessing
         The ``Preprocessing`` class.
     learnt_filter: numpy.ndarray
         Filters that express the learnt features during training.
@@ -52,7 +52,7 @@ def get_epsilon(preprocessed_data, model, mean_diff_image):
 
     Parameters
     ----------
-    preprocessed_data: antipasti.model.model.Preprocessing
+    preprocessed_data: antipasti.preprocessing.preprocessing.Preprocessing
         The ``Preprocessing`` class.
     model: antipasti.model.model.ANTIPASTI
         The model class, i.e., ``ANTIPASTI``.
@@ -86,7 +86,7 @@ def plot_map_with_regions(preprocessed_data, map, title='Normal mode correlation
 
     Parameters
     ----------
-    preprocessed_data: antipasti.model.model.Preprocessing
+    preprocessed_data: antipasti.preprocessing.preprocessing.Preprocessing
         The ``Preprocessing`` class.
     map: numpy.ndarray
         A normal mode correlation map.
@@ -187,7 +187,7 @@ def compute_change_in_kd(preprocessed_data, model, weights, coord, maps):
 
     Parameters
     ----------
-    preprocessed_data: antipasti.model.model.Preprocessing
+    preprocessed_data: antipasti.preprocessing.preprocessing.Preprocessing
         The ``Preprocessing`` class.
     model: antipasti.model.model.ANTIPASTI
         The model class, i.e., ``ANTIPASTI``.
