@@ -4,6 +4,7 @@
 [![License: MIT](https://img.shields.io/badge/license-MIT-green)](https://opensource.org/license/mit/)
 [![Tests](https://github.com/kevinmicha/ANTIPASTI/actions/workflows/tests.yml/badge.svg)](https://github.com/kevinmicha/ANTIPASTI/actions/workflows/tests.yml)
 [![Docs](https://github.com/kevinmicha/ANTIPASTI/actions/workflows/documentation.yml/badge.svg)](https://kevinmicha.github.io/ANTIPASTI/index.html)
+[![Coverage](https://codecov.io/gh/kevinmicha/ANTIPASTI/branch/main/graph/badge.svg?token=GJCV2H7L1J)](https://codecov.io/gh/kevinmicha/ANTIPASTI)
 
 ANTIPASTI (ANTIbodies - Predicting Affinity from STructural Information) is a Python Deep Learning method that predicts the binding affinity of antibodies from their sequence and three-dimensional structure.
 
