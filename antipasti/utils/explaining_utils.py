@@ -233,37 +233,32 @@ def map_residues_to_regions(preprocessed_data, epsilon):
         The coordinates of the antibody regions.
     maps: list
         The maps of the antibody regions coming from ``epsilon``.
+    labels: list
+        The antibody regions in order.
 
     """
-    max_res_list_h = preprocessed_data.max_res_list_h
-    max_res_list_l = preprocessed_data.max_res_list_l
-
-    cdr1_coord_h = range(max_res_list_h.index('26'), max_res_list_h.index('33'))
-    cdr2_coord_h = range(max_res_list_h.index('52'), max_res_list_h.index('57'))
-    cdr3_coord_h = range(max_res_list_h.index('95'), max_res_list_h.index('102')+1)
-    beta11_coord_h = range(max_res_list_h.index('33'), max_res_list_h.index('39'))
-    beta12_coord_h = range(max_res_list_h.index('45'), max_res_list_h.index('51'))
-    beta13_coord_h = range(max_res_list_h.index('57'), max_res_list_h.index('61'))
-    beta14_coord_h = range(max_res_list_h.index('89'), max_res_list_h.index('95'))
-    beta21_coord_h = range(max_res_list_h.index('67'), max_res_list_h.index('72'))
-    beta22_coord_h = range(max_res_list_h.index('75'), max_res_list_h.index('82'))
-    alpha_coord_h = range(max_res_list_h.index('84'), max_res_list_h.index('87'))
-
-    cdr1_coord_l = range(max_res_list_l.index('24'), max_res_list_l.index('34'))
-    cdr2_coord_l = range(max_res_list_l.index('50'), max_res_list_l.index('56'))
-    cdr3_coord_l = range(max_res_list_l.index('89'), max_res_list_l.index('97')+1)
-    beta11_coord_l = range(max_res_list_l.index('34'), max_res_list_l.index('38'))
-    beta12_coord_l = range(max_res_list_l.index('44'), max_res_list_l.index('48'))
-    beta13_coord_l = range(max_res_list_l.index('85'), max_res_list_l.index('89'))
-    beta21_coord_l = range(max_res_list_l.index('62'), max_res_list_l.index('65'))
-    beta22_coord_l = range(max_res_list_l.index('71'), max_res_list_l.index('75'))
+    mrlh = preprocessed_data.max_res_list_h
+    mrll = preprocessed_data.max_res_list_l
 
     maps = []
-    coord_h = [cdr1_coord_h, beta11_coord_h, beta12_coord_h, cdr2_coord_h, beta13_coord_h, beta21_coord_h, beta22_coord_h, alpha_coord_h, beta14_coord_h, cdr3_coord_h]
-    coord_l = [cdr1_coord_l, beta11_coord_l, beta12_coord_l, cdr2_coord_l, beta21_coord_l, beta22_coord_l, beta13_coord_l, cdr3_coord_l]
-    coord = coord_h + coord_l
+    subgroup_boundaries_h = [mrlh.index('26'), mrlh.index('33'), mrlh.index('39'), mrlh.index('45'), mrlh.index('51'),
+                        mrlh.index('52'), mrlh.index('57'), mrlh.index('61'), mrlh.index('67'), mrlh.index('72'),
+                        mrlh.index('75'), mrlh.index('82'), mrlh.index('84'), mrlh.index('87'), mrlh.index('89'),
+                        mrlh.index('95'), mrlh.index('102')+1]
+    subgroup_boundaries_l = [mrll.index('24'), mrll.index('34'), mrll.index('38'), mrll.index('44'), mrll.index('48'),
+                        mrll.index('50'), mrll.index('56'), mrll.index('62'), mrll.index('65'), mrll.index('71'),
+                        mrll.index('75'), mrll.index('85'), mrll.index('89'), mrll.index('97')+1]
+    labels_h = ['CDR-H1', '\u03B211', '', '\u03B212', '', 'CDR-H2', '\u03B213', '', '\u03B221', '', '\u03B222',
+            '', '\u03B1', '', '\u03B214', 'CDR-H3']
+    labels_l = ['CDR-L1', '\u03B211', '', '\u03B212', '', 'CDR-L2', '', '\u03B221', '', '\u03B222',
+            '', '\u03B213', 'CDR-L3']
+    
+    coord_h = [range(subgroup_boundaries_h[i], subgroup_boundaries_h[i+1]) for i in range(len(subgroup_boundaries_h)-1)]
+    coord_l = [range(subgroup_boundaries_l[i], subgroup_boundaries_l[i+1]) for i in range(len(subgroup_boundaries_l)-1)]
+    coord = coord_h + [range(cl[0]+mrlh.index('102')+1, cl[-1]+mrlh.index('102')+1) for cl in coord_l]
+    labels = labels_h + labels_l
 
     for i in range(len(coord)):
         maps.append(epsilon[:, coord[i]])
 
-    return np.array(coord, dtype=object), maps
+    return np.array(coord, dtype=object), maps, labels
