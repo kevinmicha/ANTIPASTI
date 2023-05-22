@@ -1,11 +1,11 @@
 antipasti\.preprocessing package
-=============================
+================================
 
 Submodules
 ----------
 
 antipasti.preprocessing.preprocessing module
------------------------------------------
+--------------------------------------------
 
 .. automodule:: antipasti.preprocessing.preprocessing
     :members:

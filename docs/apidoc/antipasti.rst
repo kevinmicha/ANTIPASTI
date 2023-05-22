@@ -1,5 +1,5 @@
 antipasti package
-==============
+=================
 
 Subpackages
 -----------

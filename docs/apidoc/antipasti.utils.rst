@@ -1,11 +1,11 @@
 antipasti\.utils package
-=====================
+========================
 
 Submodules
 ----------
 
 antipasti.utils.explaining_utils module
-------------------------------------
+---------------------------------------
 
 .. automodule:: antipasti.utils.explaining_utils
     :members:
@@ -13,7 +13,7 @@ antipasti.utils.explaining_utils module
     :show-inheritance:
 
 antipasti.utils.generic_utils module
----------------------------------
+------------------------------------
 
 .. automodule:: antipasti.utils.generic_utils
     :members:
@@ -21,7 +21,7 @@ antipasti.utils.generic_utils module
     :show-inheritance:
 
 antipasti.utils.torch_utils module
--------------------------------
+----------------------------------
 
 .. automodule:: antipasti.utils.torch_utils
     :members:

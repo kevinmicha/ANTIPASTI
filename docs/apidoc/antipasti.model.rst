@@ -1,11 +1,11 @@
 antipasti\.model package
-=====================
+========================
 
 Submodules
 ----------
 
 antipasti.model.model module
--------------------------
+----------------------------
 
 .. automodule:: antipasti.model.model
     :members:
