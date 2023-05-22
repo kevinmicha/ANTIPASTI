@@ -124,7 +124,7 @@ def plot_map_with_regions(preprocessed_data, map, title='Normal mode correlation
 
     for i in range(len(subgroup_boundaries) - 1):
         start_index = subgroup_boundaries[i]
-        end_index = subgroup_boundaries[i + 1]
+        end_index = subgroup_boundaries[i+1]
         label_position = (start_index + end_index) / 2 - 0.5
         
         # Choosing the colours
@@ -215,3 +215,55 @@ def compute_change_in_kd(preprocessed_data, model, weights, coord, maps):
     print('Without adding epsilon, Kd = ' + str(prediction[0,0]))
     print('After adding epsilon, Kd = ' + str(new_prediction[0,0]))
     print('Thus, Kd is smaller by', per_change, '%')
+
+
+def map_residues_to_regions(preprocessed_data, epsilon):
+    r"""Maps the residues to the antibody regions.
+
+    Parameters
+    ----------
+    preprocessed_data: antipasti.model.model.Preprocessing
+        The ``Preprocessing`` class.
+    epsilon: numpy.ndarray
+        A map ``epsilon`` (ϵ) such that the predicted affinity of x + ϵ is always greater than that of x.
+
+    Returns
+    -------
+    coord: numpy.ndarray
+        The coordinates of the antibody regions.
+    maps: list
+        The maps of the antibody regions coming from ``epsilon``.
+
+    """
+    max_res_list_h = preprocessed_data.max_res_list_h
+    max_res_list_l = preprocessed_data.max_res_list_l
+
+    cdr1_coord_h = range(max_res_list_h.index('26'), max_res_list_h.index('33'))
+    cdr2_coord_h = range(max_res_list_h.index('52'), max_res_list_h.index('57'))
+    cdr3_coord_h = range(max_res_list_h.index('95'), max_res_list_h.index('102')+1)
+    beta11_coord_h = range(max_res_list_h.index('33'), max_res_list_h.index('39'))
+    beta12_coord_h = range(max_res_list_h.index('45'), max_res_list_h.index('51'))
+    beta13_coord_h = range(max_res_list_h.index('57'), max_res_list_h.index('61'))
+    beta14_coord_h = range(max_res_list_h.index('89'), max_res_list_h.index('95'))
+    beta21_coord_h = range(max_res_list_h.index('67'), max_res_list_h.index('72'))
+    beta22_coord_h = range(max_res_list_h.index('75'), max_res_list_h.index('82'))
+    alpha_coord_h = range(max_res_list_h.index('84'), max_res_list_h.index('87'))
+
+    cdr1_coord_l = range(max_res_list_l.index('24'), max_res_list_l.index('34'))
+    cdr2_coord_l = range(max_res_list_l.index('50'), max_res_list_l.index('56'))
+    cdr3_coord_l = range(max_res_list_l.index('89'), max_res_list_l.index('97')+1)
+    beta11_coord_l = range(max_res_list_l.index('34'), max_res_list_l.index('38'))
+    beta12_coord_l = range(max_res_list_l.index('44'), max_res_list_l.index('48'))
+    beta13_coord_l = range(max_res_list_l.index('85'), max_res_list_l.index('89'))
+    beta21_coord_l = range(max_res_list_l.index('62'), max_res_list_l.index('65'))
+    beta22_coord_l = range(max_res_list_l.index('71'), max_res_list_l.index('75'))
+
+    maps = []
+    coord_h = [cdr1_coord_h, beta11_coord_h, beta12_coord_h, cdr2_coord_h, beta13_coord_h, beta21_coord_h, beta22_coord_h, alpha_coord_h, beta14_coord_h, cdr3_coord_h]
+    coord_l = [cdr1_coord_l, beta11_coord_l, beta12_coord_l, cdr2_coord_l, beta21_coord_l, beta22_coord_l, beta13_coord_l, cdr3_coord_l]
+    coord = coord_h + coord_l
+
+    for i in range(len(coord)):
+        maps.append(epsilon[:, coord[i]])
+
+    return np.array(coord, dtype=object), maps
