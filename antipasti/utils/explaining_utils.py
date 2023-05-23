@@ -81,7 +81,7 @@ def get_epsilon(preprocessed_data, model, mean_diff_image):
 
     return epsilon
 
-def plot_map_with_regions(preprocessed_data, map, title='Normal mode correlation map'):
+def plot_map_with_regions(preprocessed_data, map, title='Normal mode correlation map', interactive=False):
     r"""Maps the residues to the antibody regions and plots the normal mode correlation map.
 
     Parameters
@@ -92,6 +92,8 @@ def plot_map_with_regions(preprocessed_data, map, title='Normal mode correlation
         A normal mode correlation map.
     title: str
         The image title.
+    interactive: bool
+        Set to ``True`` when running a script or Pytest.
 
     """
     # Font sizes
@@ -180,7 +182,10 @@ def plot_map_with_regions(preprocessed_data, map, title='Normal mode correlation
     plt.ylabel('Residues', size=font_size)
     plt.title(title, size=title_size)
 
-    plt.show()
+    plt.show(block=False)
+    if interactive:
+        plt.pause(3)
+        plt.close('all')
 
 def compute_change_in_kd(preprocessed_data, model, weights, coord, maps):
     r"""Prints the percentage change in Kd when adding epsilon.

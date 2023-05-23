@@ -523,7 +523,7 @@ class Preprocessing(object):
         pdb_id = self.test_pdb_id
 
         if self.alphafold is True:
-            h, l, _ = self.get_lists_of_lengths(selected_entries=str(pdb_id.removesuffix('_af')).split())
+            h, l, _ = self.get_lists_of_lengths(selected_entries=str(pdb_id[:-3]).split())
             h = h[0] 
             l = l[0] 
             hupsymchain = 26 + h 
