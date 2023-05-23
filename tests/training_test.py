@@ -39,7 +39,7 @@ class TestTraining(unittest.TestCase):
 
         train_losses = []
         test_losses = []
-        train_loss, test_loss, _, _, _ = training_routine(model, criterion, optimiser, train_x, test_x, train_y, test_y, n_max_epochs=n_max_epochs, max_corr=max_corr, batch_size=batch_size, verbose=False)
+        train_loss, test_loss, _, _, _ = training_routine(model, criterion, optimiser, train_x, test_x, train_y, test_y, n_max_epochs=n_max_epochs, max_corr=max_corr, batch_size=batch_size, verbose=True)
 
         # Saving the losses
         train_losses.extend(train_loss)
@@ -73,6 +73,3 @@ class TestTraining(unittest.TestCase):
         # Saving the losses
         train_losses.extend(train_loss)
         test_losses.extend(test_loss)
-
-if __name__ == '__main__':
-    pytest.main()

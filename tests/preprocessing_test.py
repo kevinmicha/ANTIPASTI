@@ -32,6 +32,3 @@ class TestPreprocessing(unittest.TestCase):
 
     def test_load(self):
         Preprocessing(data_path=self.data_path, structures_path=self.structures_path, scripts_path=self.scripts_path, df=self.df, pathological=self.pathological, renew_maps=False, renew_residues=False)
-
-if __name__ == '__main__':
-    pytest.main()
