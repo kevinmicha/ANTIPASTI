@@ -444,7 +444,7 @@ class Preprocessing(object):
         elif self.alphafold is False:
             f = sorted(glob.glob(os.path.join(self.test_residues_path, '*'+self.test_pdb_id+'.npy')))[0]
         else:
-            f = sorted(glob.glob(os.path.join(self.test_residues_path, '*'+self.test_pdb_id.removesuffix('_af')+'.npy')))[0]
+            f = sorted(glob.glob(os.path.join(self.test_residues_path, '*'+self.test_pdb_id[:-3]+'.npy')))[0] # removing '_af' suffix
 
         f_res = np.load(f)
         max_res_h = len(self.max_res_list_h)
