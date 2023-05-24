@@ -81,6 +81,29 @@ def get_epsilon(preprocessed_data, model, mean_diff_image):
 
     return epsilon
 
+def get_test_contribution(preprocessed_data, model):
+    r"""Returns a map that reveals how to mutate a given test antibody in order to increase its affinity.
+
+    Parameters
+    ----------
+    preprocessed_data: antipasti.preprocessing.preprocessing.Preprocessing
+        The ``Preprocessing`` class.
+    model: antipasti.model.model.ANTIPASTI
+        The model class, i.e., ``ANTIPASTI``.
+
+    """
+    test_x = preprocessed_data.test_x
+    input_shape = preprocessed_data.test_x.shape[-1]
+    n_filters = model.n_filters
+    each_img_enl = np.zeros((input_shape, input_shape))
+    size_le = int(np.sqrt(model.fc1.weight.data.numpy().shape[-1] / n_filters))
+
+    inter_filter_item = model(torch.from_numpy(test_x.reshape(1, 1, input_shape, input_shape).astype(np.float32)))[1].detach().numpy()
+    for i in range(n_filters):
+        each_img_enl -= cv2.resize(np.multiply(inter_filter_item[0,i], model.fc1.weight.data.numpy().reshape(n_filters, size_le**2)[i].reshape(size_le, size_le)), dsize=(input_shape, input_shape))
+
+    return each_img_enl
+
 def plot_map_with_regions(preprocessed_data, map, title='Normal mode correlation map', interactive=False):
     r"""Maps the residues to the antibody regions and plots the normal mode correlation map.
 

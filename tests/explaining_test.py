@@ -5,7 +5,7 @@ import unittest
 
 # ANTIPASTI
 from antipasti.preprocessing.preprocessing import Preprocessing
-from antipasti.utils.explaining_utils import compute_change_in_kd, get_epsilon, get_maps_of_interest, map_residues_to_regions, plot_map_with_regions
+from antipasti.utils.explaining_utils import compute_change_in_kd, get_epsilon, get_maps_of_interest, get_test_contribution, map_residues_to_regions, plot_map_with_regions
 from antipasti.utils.torch_utils import load_checkpoint
 from tests import TEST_PATH
 
@@ -42,7 +42,8 @@ class TestTraining(unittest.TestCase):
 
         mean_learnt, mean_image, mean_diff_image = get_maps_of_interest(preprocessed_data, learnt_filter)
         plot_map_with_regions(preprocessed_data, mean_learnt, 'Average of learnt representations', True)
-
+        
+        contribution = get_test_contribution(preprocessed_data, model)
         epsilon = get_epsilon(preprocessed_data, model, mean_diff_image)
         coord, maps, labels = map_residues_to_regions(preprocessed_data, epsilon)
 
