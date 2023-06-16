@@ -43,16 +43,14 @@ python setup.py install --user
 
 ANTIPASTI requires the following Python packages: 
 * `adabelief-pytorch`
-* `contact-map`
 * `matplotlib`
-* `mdtraj`
 * `numpy`
 * `opencv-python`
 * `pandas`
-* `scikit-image`
+* `scikit-learn`
 * `torch`
 * `torchmetrics`
-* `tqdm`
+* `umap-learn`
     
 
 
