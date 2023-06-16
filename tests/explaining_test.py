@@ -44,9 +44,11 @@ class TestTraining(unittest.TestCase):
         plot_map_with_regions(preprocessed_data, mean_learnt, 'Average of learnt representations', True)
         
         contribution = get_test_contribution(preprocessed_data, model)
-        epsilon = get_epsilon(preprocessed_data, model, mean_diff_image)
+        epsilon = get_epsilon(preprocessed_data, model)
+        epsilon = get_epsilon(preprocessed_data, model, mode='extreme')
         coord, maps, labels = map_residues_to_regions(preprocessed_data, epsilon)
-
+        get_test_contribution(preprocessed_data, model)
+        
         # Expressing weights as vector
         weights_h = [0.1, 0.1, 0, 0.1, 0, 0.1, 0.1, 0, 0.1, 0, 0.1, 0, 0.1, 0, 0.1, 0.1]
         weights_l = [0.1, 0.1, 0, 0.1, 0, 0.1, 0, 0.1, 0, 0.1, 0, 0.1, 0.1]

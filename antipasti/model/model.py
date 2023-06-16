@@ -7,7 +7,7 @@ r"""This module contains the model class.
 """
 
 import torch
-from torch.nn import Linear, ReLU, Conv2d, MaxPool2d, Module, Dropout
+from torch.nn import Linear, ReLU, Conv2d, MaxPool2d, Module, Dropout, Parameter
 
 class ANTIPASTI(Module):
     r"""Predicting the binding affinity of an antibody from its normal mode correlation map.
@@ -43,7 +43,7 @@ class ANTIPASTI(Module):
         self.relu = ReLU()
         self.fc1 = Linear(self.fully_connected_input, 1, bias=False)
 
-    def forward(self, x):
+    def forward(self, input):
         r"""Model's forward pass.
 
         Returns
@@ -54,12 +54,14 @@ class ANTIPASTI(Module):
             Filters before the fully-connected layer.
             
         """
-        x = self.conv1(x) + torch.transpose(self.conv1(x), 2, 3)
+        x = self.conv1(input) + torch.transpose(self.conv1(input), 2, 3)
         x = self.relu(x)
         x = self.pool(x)
         inter = x = self.relu(x)
         x = x.view(x.size(0), -1)
         x = self.dropit(x)
         x = self.fc1(x)
+        #if torch.numel(torch.nonzero(input[0,0,-50:,-50:])) == 0:
+        #    x -= 2 
 
         return x.float(), inter

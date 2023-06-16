@@ -47,7 +47,7 @@ def get_maps_of_interest(preprocessed_data, learnt_filter, affinity_thr=-8):
 
     return mean_learnt, mean_image, mean_diff_image
 
-def get_epsilon(preprocessed_data, model, mean_diff_image):
+def get_epsilon(preprocessed_data, model, mode='general'):
     r"""Returns a map ``epsilon`` (ϵ) such that the predicted affinity of x + ϵ is always greater than that of x.
 
     Parameters
@@ -56,8 +56,8 @@ def get_epsilon(preprocessed_data, model, mean_diff_image):
         The ``Preprocessing`` class.
     model: antipasti.model.model.ANTIPASTI
         The model class, i.e., ``ANTIPASTI``.
-    mean_diff_image: numpy.ndarray
-        Map resulting from the subtraction of the mean of the high affinity correlation maps and the mean of the low affinity correlation maps.
+    mode: str
+        Choose between ``general`` and ``extreme``.
 
     """
     high_aff = []
@@ -73,11 +73,21 @@ def get_epsilon(preprocessed_data, model, mean_diff_image):
         inter_filter_item = model(torch.from_numpy(train_x[j].reshape(1, 1, input_shape, input_shape).astype(np.float32)))[1].detach().numpy()
         for i in range(n_filters):
             each_img_enl[j] += cv2.resize(np.multiply(inter_filter_item[0,i], model.fc1.weight.data.numpy().reshape(n_filters, size_le**2)[i].reshape(size_le, size_le)), dsize=(input_shape, input_shape))
-        high_aff.append(np.multiply(-np.clip(each_img_enl[j], a_min=-np.inf, a_max=0), train_x[j]))
-        low_aff.append(np.multiply(np.clip(each_img_enl[j], a_min=0, a_max=np.inf), train_x[j]))
+        new_h = np.multiply(-np.clip(each_img_enl[j], a_min=-np.inf, a_max=0), np.sign(train_x[j]))
+        new_l = np.multiply(np.clip(each_img_enl[j], a_min=0, a_max=np.inf), np.sign(train_x[j]))
+        if j == 0 or mode == 'general':
+            current_h = new_h
+            current_l = new_l
+        else:
+            current_h = np.where(np.abs(current_h)>np.abs(new_h), current_h, new_h)
+            current_l = np.where(np.abs(current_l)>np.abs(new_l), current_l, new_l)
+        high_aff.append(current_h)
+        low_aff.append(current_l)
 
-    true_filter = deepcopy(np.mean(high_aff, axis=0) - np.mean(low_aff, axis=0))
-    epsilon = np.multiply(np.abs(np.sign(mean_diff_image[0])), true_filter)
+    if mode == 'general':
+        epsilon = deepcopy(np.mean(high_aff, axis=0) - np.mean(low_aff, axis=0))
+    else:
+        epsilon = high_aff[-1] - low_aff[-1]
 
     return epsilon
 
@@ -100,9 +110,10 @@ def get_test_contribution(preprocessed_data, model):
 
     inter_filter_item = model(torch.from_numpy(test_x.reshape(1, 1, input_shape, input_shape).astype(np.float32)))[1].detach().numpy()
     for i in range(n_filters):
-        each_img_enl -= cv2.resize(np.multiply(inter_filter_item[0,i], model.fc1.weight.data.numpy().reshape(n_filters, size_le**2)[i].reshape(size_le, size_le)), dsize=(input_shape, input_shape))
-
-    return each_img_enl
+        each_img_enl += cv2.resize(np.multiply(inter_filter_item[0,i], model.fc1.weight.data.numpy().reshape(n_filters, size_le**2)[i].reshape(size_le, size_le)), dsize=(input_shape, input_shape))
+    contribution = np.multiply(-np.clip(each_img_enl, a_min=-np.inf, a_max=0), np.sign(test_x)) - np.multiply(np.clip(each_img_enl, a_min=0, a_max=np.inf), np.sign(test_x))
+    
+    return contribution
 
 def plot_map_with_regions(preprocessed_data, map, title='Normal mode correlation map', interactive=False):
     r"""Maps the residues to the antibody regions and plots the normal mode correlation map.
