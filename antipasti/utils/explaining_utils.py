@@ -131,32 +131,34 @@ def plot_map_with_regions(preprocessed_data, map, title='Normal mode correlation
 
     """
     # Font sizes
-    title_size = 20
-    font_size = 14
+    title_size = 48
+    font_size = 32
 
     # Defining the region boundaries
     mrlh = preprocessed_data.max_res_list_h
     mrll = preprocessed_data.max_res_list_l
 
-    subgroup_boundaries_h = [mrlh.index('26'), mrlh.index('33'), mrlh.index('39'), mrlh.index('45'), mrlh.index('51'),
+    subgroup_boundaries_h = [mrlh.index('3'), mrlh.index('26'), mrlh.index('33'), mrlh.index('39'), mrlh.index('45'), mrlh.index('51'),
                         mrlh.index('52'), mrlh.index('57'), mrlh.index('61'), mrlh.index('67'), mrlh.index('72'),
                         mrlh.index('75'), mrlh.index('82'), mrlh.index('84'), mrlh.index('87'), mrlh.index('89'),
-                        mrlh.index('95'), mrlh.index('102')+1]
-    subgroup_boundaries_l = [mrll.index('24'), mrll.index('34'), mrll.index('38'), mrll.index('44'), mrll.index('48'),
+                        mrlh.index('95'), mrlh.index('103'), mrlh.index('112')+1]
+    subgroup_boundaries_l = [mrll.index('3'), mrll.index('24'), mrll.index('34'), mrll.index('38'), mrll.index('44'), mrll.index('48'),
                         mrll.index('50'), mrll.index('56'), mrll.index('62'), mrll.index('65'), mrll.index('71'),
-                        mrll.index('75'), mrll.index('85'), mrll.index('89'), mrll.index('97')+1]
-    labels_h = ['CDR1', '\u03B211', '', '\u03B212', '', 'CDR2', '\u03B213', '', '\u03B221', '', '\u03B222',
-            '', '\u03B1', '', '\u03B214', 'CDR3', '']
-    labels_l = ['CDR1', '\u03B211', '', '\u03B212', '', 'CDR2', '', '\u03B221', '', '\u03B222',
-            '', '\u03B213', 'CDR3']
-
-    subgroup_boundaries = subgroup_boundaries_h + [x+mrlh.index('102')+1 for x in subgroup_boundaries_l]
+                        mrll.index('75'), mrll.index('85'), mrll.index('89'), mrll.index('98'), mrll.index('106')+1]
+    labels_h = ['F-START', 'CDR1', '\u03B211', '', '\u03B212', '', 'CDR2', '\u03B213', '', '\u03B221', '', '\u03B222',
+            '', '\u03B1', '', '\u03B214', 'CDR3', 'F-END', '']
+    labels_l = ['F-START', 'CDR1', '\u03B211', '', '\u03B212', '', 'CDR2', '', '\u03B221', '', '\u03B222',
+            '', '\u03B213', 'CDR3', 'F-END']
+    subgroup_boundaries = subgroup_boundaries_h + [x+mrlh.index('112')+1 for x in subgroup_boundaries_l]
     labels = labels_h + labels_l
     fig = plt.figure(figsize=(20, 20))
 
     # Plotting the normal mode correlation map
     plt.imshow(map, origin='lower', cmap='seismic', norm=CenteredNorm())
-    plt.colorbar(fraction=0.045)
+    cbar = plt.colorbar(fraction=0.045)
+
+    # Set the font size of the colorbar
+    cbar.ax.tick_params(labelsize=18)
 
     for i in range(len(subgroup_boundaries) - 1):
         start_index = subgroup_boundaries[i]
@@ -199,15 +201,15 @@ def plot_map_with_regions(preprocessed_data, map, title='Normal mode correlation
     plt.gca().add_patch(rect)
 
     # Adding labels for the chains on the y-axis
-    plt.text(-14, subgroup_boundaries_h[-1]/2, 'Heavy chain', ha='center', va='center', color='black', rotation='vertical', size=14)
-    plt.text(-14, subgroup_boundaries_h[-1]+subgroup_boundaries_l[-1]/2, 'Light chain', ha='center', va='center', color='black', rotation='vertical', size=14)
+    plt.text(-14, subgroup_boundaries_h[-1]/2, 'Heavy chain', ha='center', va='center', color='black', rotation='vertical', size=16)
+    plt.text(-14, subgroup_boundaries_h[-1]+subgroup_boundaries_l[-1]/2, 'Light chain', ha='center', va='center', color='black', rotation='vertical', size=16)
     # Adding labels for the chains on the x-axis
-    plt.text(subgroup_boundaries_h[-1]/2, -8.75, 'Heavy chain', ha='center', va='center', color='black', size=14)
-    plt.text(subgroup_boundaries_h[-1]+subgroup_boundaries_l[-1]/2, -8.75, 'Light chain', ha='center', va='center', color='black', size=14)
+    plt.text(subgroup_boundaries_h[-1]/2, -8.75, 'Heavy chain', ha='center', va='center', color='black', size=16)
+    plt.text(subgroup_boundaries_h[-1]+subgroup_boundaries_l[-1]/2, -8.75, 'Light chain', ha='center', va='center', color='black', size=16)
 
     # Adjusting the axis limits and labels
-    plt.xlim(-16.5, 214.5)
-    plt.ylim(-10.5, 214.5)
+    plt.xlim(-16.5, 278.5)
+    plt.ylim(-10.5, 278.5)
     plt.xticks([])
     plt.yticks([])
 
@@ -280,21 +282,21 @@ def map_residues_to_regions(preprocessed_data, epsilon):
     mrll = preprocessed_data.max_res_list_l
 
     maps = []
-    subgroup_boundaries_h = [mrlh.index('26'), mrlh.index('33'), mrlh.index('39'), mrlh.index('45'), mrlh.index('51'),
+    subgroup_boundaries_h = [mrlh.index('3'), mrlh.index('26'), mrlh.index('33'), mrlh.index('39'), mrlh.index('45'), mrlh.index('51'),
                         mrlh.index('52'), mrlh.index('57'), mrlh.index('61'), mrlh.index('67'), mrlh.index('72'),
                         mrlh.index('75'), mrlh.index('82'), mrlh.index('84'), mrlh.index('87'), mrlh.index('89'),
-                        mrlh.index('95'), mrlh.index('102')+1]
-    subgroup_boundaries_l = [mrll.index('24'), mrll.index('34'), mrll.index('38'), mrll.index('44'), mrll.index('48'),
+                        mrlh.index('95'), mrlh.index('102'), mrlh.index('112')+1]
+    subgroup_boundaries_l = [mrll.index('3'), mrll.index('24'), mrll.index('34'), mrll.index('38'), mrll.index('44'), mrll.index('48'),
                         mrll.index('50'), mrll.index('56'), mrll.index('62'), mrll.index('65'), mrll.index('71'),
-                        mrll.index('75'), mrll.index('85'), mrll.index('89'), mrll.index('97')+1]
-    labels_h = ['CDR-H1', '\u03B211', '', '\u03B212', '', 'CDR-H2', '\u03B213', '', '\u03B221', '', '\u03B222',
-            '', '\u03B1', '', '\u03B214', 'CDR-H3']
-    labels_l = ['CDR-L1', '\u03B211', '', '\u03B212', '', 'CDR-L2', '', '\u03B221', '', '\u03B222',
-            '', '\u03B213', 'CDR-L3']
+                        mrll.index('75'), mrll.index('85'), mrll.index('89'), mrll.index('97'), mrll.index('106')+1]
+    labels_h = ['F-START', 'CDR-H1', '\u03B211', '', '\u03B212', '', 'CDR-H2', '\u03B213', '', '\u03B221', '', '\u03B222',
+            '', '\u03B1', '', '\u03B214', 'CDR-H3', 'F-END']
+    labels_l = ['F-START', 'CDR-L1', '\u03B211', '', '\u03B212', '', 'CDR-L2', '', '\u03B221', '', '\u03B222',
+            '', '\u03B213', 'CDR-L3', 'F-END']
     
     coord_h = [range(subgroup_boundaries_h[i], subgroup_boundaries_h[i+1]) for i in range(len(subgroup_boundaries_h)-1)]
     coord_l = [range(subgroup_boundaries_l[i], subgroup_boundaries_l[i+1]) for i in range(len(subgroup_boundaries_l)-1)]
-    coord = coord_h + [range(cl[0]+mrlh.index('102')+1, cl[-1]+mrlh.index('102')+1) for cl in coord_l]
+    coord = coord_h + [range(cl[0]+mrlh.index('112')+1, cl[-1]+mrlh.index('112')+1) for cl in coord_l]
     labels = labels_h + labels_l
 
     for i in range(len(coord)):

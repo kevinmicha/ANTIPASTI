@@ -7,7 +7,7 @@ from torch.autograd import Variable
 
 from antipasti.model.model import ANTIPASTI
 
-def create_test_set(train_x, train_y, test_size=0.023):
+def create_test_set(train_x, train_y, test_size=None):
     r"""Creates the test set given a set of input images and their corresponding labels.
 
     Parameters
@@ -34,7 +34,19 @@ def create_test_set(train_x, train_y, test_size=0.023):
 
     # Splitting
     indices = np.arange(len(train_x))
-    train_x, test_x, train_y, test_y, indices_train, indices_test = train_test_split(train_x, train_y, indices, test_size=test_size, random_state=9)
+    if test_size == None:
+        #indices_test = [44, 63, 94, 119, 144, 149, 254, 290, 328, 357, 402, 426, 464, 489, 604, 634]
+        indices_test = [44, 62, 91, 116, 141, 146, 250, 284, 322, 349, 389, 410, 447, 471, 574, 604]
+        np.random.shuffle(indices_test)
+        indices_train = np.delete(indices, indices_test, axis=0)
+
+        test_x = train_x[indices_test]
+        test_y = train_y[indices_test]
+
+        train_x = np.delete(train_x, indices_test, axis=0)
+        train_y = np.delete(train_y, indices_test, axis=0)
+    else:
+        train_x, test_x, train_y, test_y, indices_train, indices_test = train_test_split(train_x, train_y, indices, test_size=test_size, random_state=9)
 
     # Converting to tensors
     train_x = train_x.reshape(train_x.shape[0], 1, train_x.shape[1], train_x.shape[1])
@@ -43,7 +55,7 @@ def create_test_set(train_x, train_y, test_size=0.023):
     train_y = train_y.astype(np.float32).reshape(train_y.shape[0], 1)
     train_y = torch.from_numpy(train_y)
 
-    test_x = test_x.reshape(test_x.shape[0], 1, train_x.shape[2], train_x.shape[2])
+    test_x = test_x.reshape(test_x.shape[0], 1, test_x.shape[2], test_x.shape[2])
     test_x = test_x.astype(np.float32)
     test_x  = torch.from_numpy(test_x)
     test_y = test_y.astype(np.float32).reshape(test_y.shape[0], 1, 1)
@@ -96,8 +108,7 @@ def training_step(model, criterion, optimiser, train_x, test_x, train_y, test_y,
 
     """   
     tr_loss = 0
-    batch_size = batch_size
-
+    tr_mse = 0
     x_train, y_train = Variable(train_x), Variable(train_y)
     x_test, y_test = Variable(test_x), Variable(test_y)
 
@@ -105,7 +116,18 @@ def training_step(model, criterion, optimiser, train_x, test_x, train_y, test_y,
     size_inter = int(np.sqrt(model.fully_connected_input/model.n_filters))
     inter_filter = np.zeros((x_train.size()[0], model.n_filters, size_inter, size_inter))
     
+    #perm_paired = []
+    #perm_nano = []
     permutation = torch.randperm(x_train.size()[0])
+    #for i in range(x_train.size()[0]):
+    #    if torch.numel(torch.nonzero(x_train[i,0,-80:,-80:])) == 0:
+    #        perm_nano.append(i)
+    #    else:
+    #        perm_paired.append(i)
+    #np.random.shuffle(perm_nano)
+    #np.random.shuffle(perm_paired)
+    #print(len(perm_nano))
+    #permutation = perm_nano + perm_paired
 
     for i in range(0, x_train.size()[0], batch_size):
         
@@ -116,32 +138,49 @@ def training_step(model, criterion, optimiser, train_x, test_x, train_y, test_y,
         output_train, inter_filters = model(batch_x)
         
         # Picking the appropriate filters before the fully-connected layer
-        inter_filter[i:i+batch_size] = inter_filters.detach().numpy()
+        inter_filters_detached = inter_filters.detach().clone()
+        inter_filter[i:i+batch_size] = inter_filters_detached.numpy()
 
         # Training loss, clearing gradients and updating weights
-        loss_train = criterion(output_train[:, 0], batch_y[:, 0])
+        #def closure():
+        #    optimiser.zero_grad()
+        #    output_train, inter_filters = model(batch_x)
+        #    loss_train = criterion(output_train[:, 0], batch_y[:, 0])
+        #    loss_train.backward()
+        #    return loss_train
+
+        #optimiser.step(closure)
+
+        #with torch.no_grad():
+        #    loss_train = criterion(output_train[:, 0], batch_y[:, 0]).detach()
         optimiser.zero_grad()
+        l1_loss = model.l1_regularization_loss()
+        mse_loss = criterion(output_train[:, 0], batch_y[:, 0])
+        loss_train = mse_loss + l1_loss
+        print(l1_loss)
         loss_train.backward()
-        optimiser.step()    
-        
+        optimiser.step()
         # Adding batch contribution to training loss
         tr_loss += loss_train.item() * batch_size / x_train.size()[0]
+        tr_mse += mse_loss * batch_size / x_train.size()[0]
 
     train_losses.append(tr_loss)
     loss_test = 0
-    output_test, _ = model(x_test)
+    output_test = []
     for i in range(x_test.size()[0]):
         output_t, _ = model(x_test[i].reshape(1, 1, model.input_shape, model.input_shape))
+        l1_loss = model.l1_regularization_loss()
         loss_t = criterion(output_t[:, 0], y_test[i][:, 0])
-        loss_test += loss_t / x_test.size()[0]
+        loss_test += loss_t.item() / x_test.size()[0]
         if verbose:
             print(output_t)
             print(y_test[i])
             print('------------------------')
+        output_test.append(output_t[:,0].detach().numpy())
     test_losses.append(loss_test)
     
     # Training and test losses
-    print('Epoch : ', epoch+1, '\t', 'train loss: ', tr_loss, 'test loss :', loss_test)
+    print('Epoch : ', epoch+1, '\t', 'train loss: ', tr_loss, 'train MSE: ', tr_mse, 'test MSE: ', loss_test)
 
         
     return train_losses, test_losses, inter_filter, y_test, output_test
@@ -195,7 +234,7 @@ def training_routine(model, criterion, optimiser, train_x, test_x, train_y, test
         train_losses, test_losses, inter_filter, y_test, output_test = training_step(model, criterion, optimiser, train_x, test_x, train_y, test_y, train_losses, test_losses, epoch, batch_size, verbose)
 
         # Computing and printing the correlation coefficient
-        corr = np.corrcoef(output_test.detach().numpy().T, y_test[:,0].detach().numpy().T)[1,0]
+        corr = np.corrcoef(np.array(output_test).T, y_test[:,0].detach().numpy().T)[1,0]
         if verbose:
             print('Corr: ' + str(corr))
         if corr > max_corr:

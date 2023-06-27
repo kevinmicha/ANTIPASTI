@@ -181,30 +181,40 @@ class Preprocessing(object):
             content = f.readlines()
             header_lines_important = range(4)
             header_lines = [content[i][0]=='R' for i in range(len(content))].count(True)
-            h_range = range(26, 103)
-            l_range = range(24, 98)
+            h_range = range(3, 113)
+            l_range = range(3, 107)
             start_chain = 21
             chain_range = slice(start_chain, start_chain+1)
             res_range = slice(23, 26)
             res_extra_letter = 26 #sometimes includes a letter 'A', 'B', 'C', ...
             h_chain_key = 'HCHAIN'
             l_chain_key = 'LCHAIN'
+            antigen_chain_key = 'AGCHAIN'
             idx_list = list(header_lines_important)
             idx_list_l = []
+            idx_list_antigen = []
             new_path = path[:-4] + self.selection + path[-4:]
             
-            # Getting the names of the heavy and light chains
+            # Getting the names of the heavy and antigen chains
             line = content[header_lines_important[-1]]
             if line.find(h_chain_key) != -1:
                 h_pos = line.find(h_chain_key) + len(h_chain_key) + 1
                 h_chain = line[h_pos:h_pos+1]
+                antigen_pos = line.find(antigen_chain_key) + len(antigen_chain_key) + 1
+                antigen_chain = line[antigen_pos:antigen_pos+1]
+                if line[antigen_pos+1] == ',':
+                    second_antigen_chain = line[antigen_pos+2] # If two interacting antigen chains present
+                else:
+                    second_antigen_chain = None
             else:
                 # useful when using AlphaFold
                 h_chain = 'A' 
                 l_chain = 'B'
+                antigen_chain = 'C'
+                second_antigen_chain = 'D'
                 idx_list = [0]
-                h_range = range(26-self.h_offset, hupsymchain-self.h_offset)
-                l_range = range(24-self.l_offset, lupsymchain-self.l_offset)
+                h_range = range(3-self.h_offset, hupsymchain-self.h_offset)
+                l_range = range(3-self.l_offset, lupsymchain-self.l_offset)
                 h_pos = start_chain
                 l_pos = start_chain
                 
@@ -225,7 +235,7 @@ class Preprocessing(object):
             # Obtaining the CDR1 to CDR3 lines for the heavy chain first
             for i, line in enumerate(content[header_lines:]):
                 if line[chain_range].find(h_chain) != -1 and int(line[res_range]) in h_range:
-                    if line[res_extra_letter] == ' ' or keepABC == True:
+                    if (line[res_extra_letter] == ' ' or keepABC == True) and line.find('HETATM') == -1:
                         idx_list.append(i+header_lines)
                         if lresidues == True:
                             full_res = line[res_range] + line[res_extra_letter]
@@ -240,7 +250,7 @@ class Preprocessing(object):
             if l_chain is not None:
                 for i, line in enumerate(content[header_lines:]):
                     if line[chain_range].find(l_chain) != -1 and int(line[res_range]) in l_range:
-                        if line[res_extra_letter] == ' ' or keepABC == True:
+                        if (line[res_extra_letter] == ' ' or keepABC == True) and line.find('HETATM') == -1:
                             idx_list_l.append(i+header_lines)
                             if lresidues == True:
                                 full_res = line[res_range] + line[res_extra_letter]
@@ -251,18 +261,37 @@ class Preprocessing(object):
                                 if full_res != list_residues[-1]:
                                     list_residues.append(full_res)                   
         
+            # Obtaining antigen
+            for i, line in enumerate(content[header_lines:]):
+                if line[chain_range].find(antigen_chain) != -1 and antigen_chain != h_chain and antigen_chain != l_chain:
+                    idx_list_antigen.append(i+header_lines)
+                elif line[chain_range].find(antigen_chain) != -1 and line.find('HETATM') != -1:
+                    idx_list_antigen.append(i+header_lines)
+
+            # If second antigen chain present
+            if second_antigen_chain is not None:
+                for i, line in enumerate(content[header_lines:]):
+                    if line[chain_range].find(second_antigen_chain) != -1:
+                        idx_list_antigen.append(i+header_lines)
+
         # List with name of every residue is saved if selected
         if lresidues == True:
             list_residues.append('END')
             saving_path = rpath + path[-8:-4] + '.npy'
-            if not os.path.exists(saving_path):
-                np.save(saving_path, list_residues)
+            #if not os.path.exists(saving_path):
+            np.save(saving_path, list_residues)
                                         
         # Creating new file
         with open(new_path, 'w') as f_new:
             if pathologic:
-                new_hchain = 'A'
-                new_lchain = 'B'
+                if antigen_chain != 'A':
+                    new_hchain = 'A'
+                else: 
+                    new_hchain = 'W'
+                if antigen_chain != 'B':
+                    new_lchain = 'B'
+                else: 
+                    new_lchain = 'X'
             else:
                 new_hchain = h_chain
                 new_lchain = l_chain
@@ -272,9 +301,10 @@ class Preprocessing(object):
                 f_new.writelines([content[l][:h_pos]+new_hchain+content[l][h_pos+1:l_pos]+new_lchain+content[l][l_pos+1:] for l in idx_list[header_lines_important[-1]:header_lines_important[-1]+1]])
             else:
                 f_new.writelines([content[l][:h_pos]+new_hchain+content[l][h_pos+1:] for l in idx_list[header_lines_important[-1]:header_lines_important[-1]+1]])
-            f_new.writelines([content[l][:start_chain]+new_hchain+content[l][start_chain+1:] for l in idx_list[header_lines_important[-1]+1:]])
+            f_new.writelines([content[l][:start_chain-5]+' '+content[l][start_chain-4:start_chain]+new_hchain+content[l][start_chain+1:] for l in idx_list[header_lines_important[-1]+1:]])
             if l_chain is not None:
-                f_new.writelines([content[l][:start_chain]+new_lchain+content[l][start_chain+1:] for l in idx_list_l])
+                f_new.writelines([content[l][:start_chain-5]+' '+content[l][start_chain-4:start_chain]+new_lchain+content[l][start_chain+1:] for l in idx_list_l])
+            #f_new.writelines([content[l][:start_chain]+antigen_chain+content[l][start_chain+1:] for l in idx_list_antigen])
 
     def generate_maps(self):
         r"""Generates the normal mode correlation maps.
@@ -466,7 +496,7 @@ class Preprocessing(object):
         current_list_h = [x[1:].strip() for x in current_list_h]
         current_list_l = f_res[h+1:h+l+1]
         current_list_l = [x[1:].strip() for x in current_list_l]    
-        
+
         if self.mode == 'fully-cropped':
             idx_list = [i for i in range(len(current_list_h)) if current_list_h[i] in self.min_res_list_h]
             idx_list += [i+len(current_list_h) for i in range(len(current_list_l)) if current_list_l[i] in self.min_res_list_l]
@@ -500,7 +530,7 @@ class Preprocessing(object):
 
         for f in file_paths:
             pdb_id = f[-8:-4]
-            if pdb_id in self.selected_entries:
+            if pdb_id in self.selected_entries and pdb_id not in self.pathological:
                 raw_sample = np.load(f)
                 idx = self.entries.index(pdb_id)
                 idx_new = self.selected_entries.index(pdb_id)
@@ -509,10 +539,11 @@ class Preprocessing(object):
                 imgs.append(self.generate_masked_image(raw_sample, idx_new)[0])
                 kds.append(np.log10(np.float32(self.affinity[idx])))
 
-        assert labels == self.selected_entries
+        assert labels == [item for item in self.selected_entries if item not in self.pathological]
 
         for pdb in self.selected_entries:
-            assert np.float16(10**kds[self.selected_entries.index(pdb)] == np.float16(self.df[self.df['pdb']==pdb]['affinity'])).all()
+            if pdb not in self.pathological:
+                assert np.float16(10**kds[[item for item in self.selected_entries if item not in self.pathological].index(pdb)] == np.float16(self.df[self.df['pdb']==pdb]['affinity'])).all()
 
         return np.array(imgs), np.array(kds), labels, raw_imgs
 
@@ -526,8 +557,8 @@ class Preprocessing(object):
             h, l, _ = self.get_lists_of_lengths(selected_entries=str(pdb_id[:-3]).split())
             h = h[0] 
             l = l[0] 
-            hupsymchain = 26 + h 
-            lupsymchain = 24 + l
+            hupsymchain = 3 + h 
+            lupsymchain = 3 + l
             lresidues = False
         else:
             hupsymchain = None
