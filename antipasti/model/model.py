@@ -27,9 +27,9 @@ class ANTIPASTI(Module):
     def __init__(
             self,
             n_filters=2,
-            filter_size=5,
+            filter_size=4,
             pooling_size=1,
-            input_shape=215,
+            input_shape=281,
             l1_lambda=0.002,
     ):
         super(ANTIPASTI, self).__init__()

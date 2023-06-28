@@ -37,7 +37,7 @@ def create_test_set(train_x, train_y, test_size=None):
     if test_size == None:
         #indices_test = [44, 63, 94, 119, 144, 149, 254, 290, 328, 357, 402, 426, 464, 489, 604, 634]
         #indices_test = [44, 62, 91, 116, 141, 146, 250, 284, 322, 349, 389, 410, 447, 471, 574, 604]
-        indices_test = [44, 62, 91, 116, 141, 146, 216, 250, 284, 348, 388, 409, 470, 573, 603, 648]
+        indices_test = [44, 62, 91, 116, 141, 146, 216, 250, 284, 388, 409, 470, 501, 573, 603, 648]
         np.random.shuffle(indices_test)
         indices_train = np.delete(indices, indices_test, axis=0)
 
