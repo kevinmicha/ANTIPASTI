@@ -30,7 +30,7 @@ class ANTIPASTI(Module):
             filter_size=5,
             pooling_size=1,
             input_shape=215,
-            l1_lambda=0.005,
+            l1_lambda=0.002,
     ):
         super(ANTIPASTI, self).__init__()
         self.n_filters = n_filters
@@ -70,7 +70,7 @@ class ANTIPASTI(Module):
         #x = self.conv1_bn(x)
         x = self.relu(x)
         x = self.pool(x)
-        inter = x
+        inter = x 
         x = x.view(x.size(0), -1)
         x = self.dropit(x)
         #if torch.numel(torch.nonzero(input[0,0,-80:,-80:])) == 0:
