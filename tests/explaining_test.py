@@ -60,10 +60,18 @@ class TestTraining(unittest.TestCase):
         weights = np.array(weights_h + weights_l)
 
         compute_change_in_kd(preprocessed_data, model, weights, coord, maps)
+        random_sequence = list(np.linspace(0, 1, num=preprocessed_data.train_x.shape[0]))
+        random_sequence_delete = random_sequence.copy()
+        random_sequence_delete[0] = 'unknown'
 
         compute_umap(preprocessed_data, model, scheme='heavy_species', regions='paired_hl', categorical=True, include_ellipses=True, numerical_values=None, external_cdict=None, interactive=True)
+        compute_umap(preprocessed_data, model, scheme='light_ctype', regions='paired_hl', categorical=True, include_ellipses=True, numerical_values=None, external_cdict=None, interactive=True)
         compute_umap(preprocessed_data, model, scheme='heavy_subclass', regions='heavy', categorical=True, include_ellipses=False, numerical_values=None, external_cdict=None, interactive=True)
+        compute_umap(preprocessed_data, model, scheme='light_subclass', regions='paired_hl', categorical=True, include_ellipses=False, numerical_values=None, external_cdict=None, interactive=True)
+        compute_umap(preprocessed_data, model, scheme='antigen_type', regions='paired_hl', categorical=True, include_ellipses=False, numerical_values=None, external_cdict=None, interactive=True)
         compute_umap(preprocessed_data, model, scheme='antigen_species', regions='paired_hl', categorical=True, include_ellipses=False, numerical_values=None, external_cdict=cdict, interactive=True)
-        compute_umap(preprocessed_data, model, scheme='Random sequence', regions='paired_hl', categorical=False, include_ellipses=False, numerical_values=list(np.linspace(0, 1, num=preprocessed_data.train_x.shape[0])), external_cdict=None, interactive=True)
+        compute_umap(preprocessed_data, model, scheme='Random sequence', regions='paired_hl', categorical=False, include_ellipses=False, numerical_values=random_sequence, external_cdict=None, interactive=True)
+        compute_umap(preprocessed_data, model, scheme='Random sequence', regions='paired_hl', categorical=False, include_ellipses=False, numerical_values=random_sequence_delete, external_cdict=None, interactive=True)
+
 
         

@@ -432,11 +432,13 @@ def compute_umap(preprocessed_data, model, scheme='heavy_species', regions='pair
                 labels[i] = 'Other'
     else:
         cdict = None
+        deleted_items = 0
         for i, item in enumerate(numerical_values):
             if isinstance(item, (int, float)):
                 colours.append(item)
             else:
-                np.delete(each_img_enl, i, axis=0)
+                deleted_items += 1
+                embedding = np.delete(embedding, i-deleted_items, axis=0)
     
     plot_umap(embedding=embedding, colours=colours, scheme=scheme, pdb_codes=pdb_codes, categorical=categorical, include_ellipses=include_ellipses, cdict=cdict, interactive=interactive)
 
