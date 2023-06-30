@@ -1,10 +1,18 @@
 import cv2
+import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
 import torch
+import warnings
+warnings.filterwarnings("ignore", message=".*The 'nopython' keyword.*")
+import umap
 
 from copy import deepcopy
 from matplotlib.colors import CenteredNorm
+import matplotlib.patches as patches
+from scipy.stats import chi2
+from sklearn.preprocessing import StandardScaler
 
 def get_maps_of_interest(preprocessed_data, learnt_filter, affinity_thr=-8):
     r"""Post-processes both raw data and results to obtain maps of interest.
@@ -142,8 +150,8 @@ def plot_map_with_regions(preprocessed_data, map, title='Normal mode correlation
                         mrlh.index('52'), mrlh.index('57'), mrlh.index('61'), mrlh.index('67'), mrlh.index('72'),
                         mrlh.index('75'), mrlh.index('82'), mrlh.index('84'), mrlh.index('87'), mrlh.index('89'),
                         mrlh.index('95'), mrlh.index('103'), mrlh.index('112')+1]
-    subgroup_boundaries_l = [mrll.index('3'), mrll.index('24'), mrll.index('34'), mrll.index('38'), mrll.index('44'), mrll.index('48'),
-                        mrll.index('50'), mrll.index('56'), mrll.index('62'), mrll.index('65'), mrll.index('71'),
+    subgroup_boundaries_l = [mrll.index('3'), mrll.index('24'), mrll.index('35'), mrll.index('38'), mrll.index('44'), mrll.index('48'),
+                        mrll.index('50'), mrll.index('57'), mrll.index('62'), mrll.index('65'), mrll.index('71'),
                         mrll.index('75'), mrll.index('85'), mrll.index('89'), mrll.index('98'), mrll.index('106')+1]
     labels_h = ['F-START', 'CDR1', '\u03B211', '', '\u03B212', '', 'CDR2', '\u03B213', '', '\u03B221', '', '\u03B222',
             '', '\u03B1', '', '\u03B214', 'CDR3', 'F-END', '']
@@ -285,10 +293,10 @@ def map_residues_to_regions(preprocessed_data, epsilon):
     subgroup_boundaries_h = [mrlh.index('3'), mrlh.index('26'), mrlh.index('33'), mrlh.index('39'), mrlh.index('45'), mrlh.index('51'),
                         mrlh.index('52'), mrlh.index('57'), mrlh.index('61'), mrlh.index('67'), mrlh.index('72'),
                         mrlh.index('75'), mrlh.index('82'), mrlh.index('84'), mrlh.index('87'), mrlh.index('89'),
-                        mrlh.index('95'), mrlh.index('102'), mrlh.index('112')+1]
-    subgroup_boundaries_l = [mrll.index('3'), mrll.index('24'), mrll.index('34'), mrll.index('38'), mrll.index('44'), mrll.index('48'),
-                        mrll.index('50'), mrll.index('56'), mrll.index('62'), mrll.index('65'), mrll.index('71'),
-                        mrll.index('75'), mrll.index('85'), mrll.index('89'), mrll.index('97'), mrll.index('106')+1]
+                        mrlh.index('95'), mrlh.index('103'), mrlh.index('112')+1]
+    subgroup_boundaries_l = [mrll.index('3'), mrll.index('24'), mrll.index('35'), mrll.index('38'), mrll.index('44'), mrll.index('48'),
+                        mrll.index('50'), mrll.index('57'), mrll.index('62'), mrll.index('65'), mrll.index('71'),
+                        mrll.index('75'), mrll.index('85'), mrll.index('89'), mrll.index('98'), mrll.index('106')+1]
     labels_h = ['F-START', 'CDR-H1', '\u03B211', '', '\u03B212', '', 'CDR-H2', '\u03B213', '', '\u03B221', '', '\u03B222',
             '', '\u03B1', '', '\u03B214', 'CDR-H3', 'F-END']
     labels_l = ['F-START', 'CDR-L1', '\u03B211', '', '\u03B212', '', 'CDR-L2', '', '\u03B221', '', '\u03B222',
@@ -303,3 +311,229 @@ def map_residues_to_regions(preprocessed_data, epsilon):
         maps.append(epsilon[:, coord[i]])
 
     return np.array(coord, dtype=object), maps, labels
+
+def compute_umap(preprocessed_data, model, scheme='heavy_species', regions='paired_hl', categorical=True, include_ellipses=False, numerical_values=None, external_cdict=None, interactive=False):
+    r"""Performs UMAP dimensionality reduction calculations.
+
+    Parameters
+    ----------
+    preprocessed_data: antipasti.model.model.Preprocessing
+        The ``Preprocessing`` class.
+    model: antipasti.model.model.ANTIPASTI
+        The model class, i.e., ``ANTIPASTI``.
+    scheme: str
+        Category of the labels or values appearing in the UMAP representation.
+    regions: str
+        Choose between ``paired_hl`` (heavy chain, light chain and their interactions) and ``heavy`` (heavy chain only).
+    categorical: bool
+        ``True`` if ``scheme`` is categorical.
+    include_ellipses: bool
+        ``True`` if ellipses comprising three quarters of the points of a given class are included.
+    numerical_values: list
+        A list of values or entries should be provided if data external to SAbDab is used.
+    external_cdict: dictionary
+        Option to provide an external dictionary of the UMAP labels.
+    interactive: bool
+        Set to ``True`` when running a script or Pytest.
+
+    """
+    train_x = preprocessed_data.train_x
+    input_shape = preprocessed_data.test_x.shape[-1]
+
+    if regions == 'paired_hl':
+        reducer = umap.UMAP(random_state=32, min_dist=0.1, n_neighbors=90) # Paired-HL
+        umap_shape = input_shape
+    else:
+        reducer = umap.UMAP(random_state=32, min_dist=0.15, n_neighbors=16) # Heavy
+        umap_shape = len(preprocessed_data.max_res_list_h)
+
+    labels = []
+    colours = []
+    each_img_enl = np.zeros((train_x.shape[0], umap_shape**2))
+    n_filters = model.n_filters
+    size_le = int(np.sqrt(model.fc1.weight.data.numpy().shape[-1] / n_filters))
+    pdb_codes = preprocessed_data.labels
+    db = pd.read_csv('data/sabdab_summary_all.tsv', sep='\t')
+    if scheme in db.columns:
+        db = db.loc[:,['pdb', scheme]]
+
+    # Obtaining the labels and the output layer representations
+    for j in range(train_x.shape[0]):
+        if scheme in db.columns:
+            labels.append(str(db[db['pdb'] == pdb_codes[j]].iloc[0][scheme]))
+        inter_filter_item = model(torch.from_numpy(train_x[j].reshape(1, 1, input_shape, input_shape).astype(np.float32)))[1].detach().numpy()
+        for i in range(n_filters):
+            each_img_enl[j] += cv2.resize(np.multiply(inter_filter_item[0,i], model.fc1.weight.data.numpy().reshape(n_filters, size_le**2)[i].reshape(size_le, size_le)), dsize=(input_shape, input_shape))[:umap_shape, :umap_shape].reshape((umap_shape**2))
+    
+    # UMAP fitting 
+    scaled_each_img = StandardScaler().fit_transform(each_img_enl)
+    embedding = reducer.fit_transform(scaled_each_img)
+
+    if categorical:
+        if scheme == 'light_subclass':
+            cdict = {'IGKV1': 0,
+                'IGKV2': 1,
+                'IGKV3': 2,
+                'IGKV4': 3,
+                'IGKV5': 4,
+                'IGKV6': 5,
+                'IGKV7': 6,
+                'IGKV8': 7,
+                'IGKV9': 8,
+                'IGKV10': 9,
+                'IGKV14': 10,
+                'IGLV1': 11,
+                'IGLV2': 12,
+                'IGLV6': 13,
+                'Other': 14,}
+            scheme = 'Light chain V gene family'
+
+        elif scheme == 'heavy_subclass':
+            cdict = {'IGHV1': 0,
+                'IGHV2': 1,
+                'IGHV3': 2,
+                'IGHV4': 3,
+                'IGHV5': 4,
+                'IGHV6': 5,
+                'IGHV7': 6,
+                'Other': 7,}
+            scheme = 'Heavy chain V gene family'
+
+        elif scheme == 'heavy_species' or scheme == 'light_species':
+            cdict = {'homo sapiens': 0,
+                'mus musculus': 1,
+                'Other': 2}
+            scheme = 'Antibody species'
+
+        elif scheme == 'light_ctype':
+            cdict = {'Kappa': 0,
+                'Lambda': 1,
+                'unknown': 2,
+                'NA': 3,
+                'Other': 4,}
+            scheme = 'Type of light chain'
+
+        elif scheme == 'antigen_type':
+            cdict = {'protein': 0,
+                'peptide': 1,
+                'Hapten': 2,
+                'protein | protein': 3,
+                'carbohydrate': 4,
+                'Other': 5}
+            scheme = 'Type of antigen'
+        else:
+            cdict = external_cdict
+
+        for i in range(len(labels)):
+            if labels[i] in cdict:
+                colours.append(cdict[labels[i]])
+            else:
+                colours.append(cdict['Other'])
+                labels[i] = 'Other'
+    else:
+        cdict = None
+        for i, item in enumerate(numerical_values):
+            if isinstance(item, (int, float)):
+                colours.append(item)
+            else:
+                np.delete(each_img_enl, i, axis=0)
+    
+    plot_umap(embedding=embedding, colours=colours, scheme=scheme, pdb_codes=pdb_codes, categorical=categorical, include_ellipses=include_ellipses, cdict=cdict, interactive=interactive)
+
+def plot_umap(embedding, colours, scheme, pdb_codes, categorical=True, include_ellipses=False, cdict=None, interactive=False):
+    r"""Plots UMAP maps.
+
+    Parameters
+    ----------
+    embedding: numpy.ndarray
+        The output layer representations after dimensionality reduction.
+    colours: list
+        The data points labels or values.
+    scheme: str
+        Category of the labels or values appearing in the UMAP representation.
+    pdb_codes: list
+        The PDB codes of the antibodies.
+    categorical: bool
+        ``True`` if ``scheme`` is categorical.
+    include_ellipses: bool
+        ``True`` to include ellipses comprising 85% of the points of a given class.
+    interactive: bool
+        Set to ``True`` when running a script or Pytest.
+
+    """
+    fig = plt.figure(figsize=(20,20))
+    ax = fig.add_subplot()
+
+    if categorical:
+        cmap = matplotlib.colormaps.get_cmap('tab10')
+    else:
+        cmap = matplotlib.colormaps.get_cmap('Purples')
+    unique_colours = list(set(colours))
+    norm = plt.Normalize(np.min(colours), np.max(colours))
+    legend_patches = [patches.Patch(color=cmap(norm(color))) for color in unique_colours]
+    im = ax.scatter(embedding[:, 0], embedding[:, 1] , s=50, c=colours, cmap=cmap)
+
+    for i in range(len(pdb_codes)):
+        if i % 10 == 0:
+            ax.annotate(pdb_codes[i], (embedding[i, 0], embedding[i, 1]), size=8)
+
+    if include_ellipses:
+        # Inverse of the chi-squared CDF
+        conf_level = 0.85
+        inv_chi2 = chi2.ppf(conf_level, df=2)
+        ellipses = []  # Store ellipse information
+
+        for label in unique_colours:
+            label_points = embedding[np.array(colours) == label]  # Subset of UMAP points for a specific label
+            n_points = len(label_points)
+            
+            # Calculate the centroid using all the points of a class
+            center = np.mean(label_points, axis=0)
+            covariance = np.cov(label_points.T)
+            # Calculate the distance of each point
+            dist = np.sum(np.square(label_points - center), axis=1)
+            
+            # Sort the points based on the distance
+            sorted_indices = np.argsort(dist)
+            
+            # Calculate the number of points to include within the ellipse
+            n_inside = int(np.ceil(n_points * conf_level))
+            
+            # Select the points that fall within the ellipse
+            inside_points = label_points[sorted_indices[:n_inside]]
+            
+            # Recalculate the mean and covariance using only the inside points
+            center = np.mean(inside_points, axis=0)
+            covariance = np.cov(inside_points.T)
+            
+            # Calculate the eigenvalues and eigenvectors of the covariance matrix again
+            eigenvalues, eigenvectors = np.linalg.eig(covariance)
+            angle = np.degrees(np.arctan2(*eigenvectors[:, 0][::-1]))
+            
+            # Calculate the scaling factor for the ellipse based on the eigenvalues again
+            scale_factor = np.sqrt(inv_chi2)
+            
+            # Calculate the radius of the ellipse based on the eigenvalues and the scaling factor
+            radius = np.sqrt(eigenvalues) * scale_factor
+            
+            ellipse = patches.Ellipse(xy=center, width=2 * radius[0], height=2 * radius[1],
+                                    angle=angle, fill=False, linewidth=3, alpha=0.7, color=cmap(norm(label)))
+            ellipses.append(ellipse)
+
+        for i, ellipse in enumerate(ellipses):
+            if list(cdict.keys())[i] not in ['unknown', 'Other']:
+                ax.add_patch(ellipse)
+
+    if categorical:
+        legend1 = ax.legend(legend_patches, cdict.keys(), loc='lower right')
+    else:
+        legend1 = ax.legend(legend_patches[:10], set(colours), loc='lower right')
+    ax.add_artist(legend1)
+
+    ax.set_title(scheme, size=18)
+    ax.set_xlabel('UMAP 1', size=16)
+    ax.set_ylabel('UMAP 2', size=16)
+    plt.show(block=False)
+    if interactive:
+        plt.pause(3)
+        plt.close('all')

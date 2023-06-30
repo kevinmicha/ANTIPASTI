@@ -4,6 +4,14 @@ antipasti\.utils package
 Submodules
 ----------
 
+antipasti.utils.biology_utils module
+------------------------------------
+
+.. automodule:: antipasti.utils.biology_utils
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 antipasti.utils.explaining_utils module
 ---------------------------------------
 

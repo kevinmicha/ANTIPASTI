@@ -5,7 +5,7 @@ import unittest
 
 # ANTIPASTI
 from antipasti.preprocessing.preprocessing import Preprocessing
-from antipasti.utils.explaining_utils import compute_change_in_kd, get_epsilon, get_maps_of_interest, get_test_contribution, map_residues_to_regions, plot_map_with_regions
+from antipasti.utils.explaining_utils import compute_change_in_kd, compute_umap, get_epsilon, get_maps_of_interest, get_test_contribution, map_residues_to_regions, plot_map_with_regions
 from antipasti.utils.torch_utils import load_checkpoint
 from tests import TEST_PATH
 
@@ -30,6 +30,11 @@ class TestTraining(unittest.TestCase):
         
     def test_explaining(self):
 
+        # Example class dictionary
+        cdict = {'homo sapiens': 0,
+            'mus musculus': 1,
+            'Other': 2}
+        
         # Pre-processing
         preprocessed_data = Preprocessing(data_path=self.data_path, modes=self.modes, pathological=self.pathological, regions=self.regions, mode=self.mode, stage=self.stage, test_data_path=self.test_data_path, test_dccm_map_path=self.test_dccm_map_path, test_residues_path=self.test_residues_path, test_structure_path=self.test_structure_path)
         input_shape = preprocessed_data.test_x.shape[-1]
@@ -55,3 +60,10 @@ class TestTraining(unittest.TestCase):
         weights = np.array(weights_h + weights_l)
 
         compute_change_in_kd(preprocessed_data, model, weights, coord, maps)
+
+        compute_umap(preprocessed_data, model, scheme='heavy_species', regions='paired_hl', categorical=True, include_ellipses=True, numerical_values=None, external_cdict=None, interactive=True)
+        compute_umap(preprocessed_data, model, scheme='heavy_subclass', regions='heavy', categorical=True, include_ellipses=False, numerical_values=None, external_cdict=None, interactive=True)
+        compute_umap(preprocessed_data, model, scheme='antigen_species', regions='paired_hl', categorical=True, include_ellipses=False, numerical_values=None, external_cdict=cdict, interactive=True)
+        compute_umap(preprocessed_data, model, scheme='Random sequence', regions='paired_hl', categorical=False, include_ellipses=False, numerical_values=list(np.linspace(0, 1, num=preprocessed_data.train_x.shape[0])), external_cdict=None, interactive=True)
+
+        

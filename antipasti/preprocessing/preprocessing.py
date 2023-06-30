@@ -284,14 +284,16 @@ class Preprocessing(object):
         # Creating new file
         with open(new_path, 'w') as f_new:
             if pathologic:
-                if antigen_chain != 'A':
-                    new_hchain = 'A'
-                else: 
-                    new_hchain = 'W'
-                if antigen_chain != 'B':
-                    new_lchain = 'B'
-                else: 
-                    new_lchain = 'X'
+                #if antigen_chain != 'A':
+                #    new_hchain = 'A'
+                #else: 
+                #    new_hchain = 'W'
+                #if antigen_chain != 'B':
+                #    new_lchain = 'B'
+                #else: 
+                #    new_lchain = 'X'
+                new_hchain = 'A'
+                new_lchain = 'B'
             else:
                 new_hchain = h_chain
                 new_lchain = l_chain

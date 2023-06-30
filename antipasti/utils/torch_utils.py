@@ -290,16 +290,10 @@ def load_checkpoint(path, input_shape, n_filters=None, pooling_size=None, filter
     checkpoint = torch.load(path)
     model.load_state_dict(checkpoint['model_state_dict'])
     optimiser = AdaBelief(model.parameters(), eps=1e-8, print_change_log=False) 
-    if 'optimiser_state_dict' in checkpoint:
-        optimiser.load_state_dict(checkpoint['optimiser_state_dict'])
-    else:
-        optimiser.load_state_dict(checkpoint['optimizer_state_dict'])
+    optimiser.load_state_dict(checkpoint['optimiser_state_dict'])
     n_epochs = checkpoint['epoch']
     train_losses = checkpoint['tr_loss']
-    if 'test_loss' in checkpoint:
-        test_losses = checkpoint['test_loss']
-    else:
-        test_losses = checkpoint['val_loss']
+    test_losses = checkpoint['test_loss']
 
     return model, optimiser, n_epochs, train_losses, test_losses
 
