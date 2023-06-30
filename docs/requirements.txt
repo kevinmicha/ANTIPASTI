@@ -1,4 +1,5 @@
 adabelief-pytorch>=0.2.1
+beautifulsoup4>=4.12.2
 coverage>=7.2.5
 matplotlib>=3.6.2
 numpy>=1.23.3

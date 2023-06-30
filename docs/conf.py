@@ -13,7 +13,7 @@
 import os
 import sys
 sys.path.insert(0, os.path.abspath('../'))
-autodoc_mock_imports = ['adabelief_pytorch', 'cv2', 'matplotlib', 'numpy', 'pandas', 'sklearn', 'torch', 'umap-learn']
+autodoc_mock_imports = ['adabelief_pytorch', 'bs4', 'cv2', 'matplotlib', 'numpy', 'pandas', 'sklearn', 'torch', 'umap']
 
 
 # -- Project information -----------------------------------------------------
