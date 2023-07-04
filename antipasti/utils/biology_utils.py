@@ -2,6 +2,8 @@ import numpy as np
 import requests
 from bs4 import BeautifulSoup
 
+from config import DATA_DIR
+
 def get_types_of_residues(pdb_codes):
     r"""Returns lists of aromaticity, hydrophobicity, charge and polarity scores between 0 and 1.
 
@@ -21,6 +23,7 @@ def get_types_of_residues(pdb_codes):
     polar_residues = ['N', 'Q', 'S', 'T']
 
     for pdb_code in pdb_codes:
+        print(pdb_code)
         paratope = extract_paratope_epitope(pdb_code, 'Paratope')
         if paratope == '' or paratope[1] == '':
             aromaticity.append('unknown')
@@ -30,10 +33,10 @@ def get_types_of_residues(pdb_codes):
         else:
             epitope = extract_paratope_epitope(pdb_code, 'Epitope')
             paratope_list = paratope[1].split()
-            aromaticity.append(len([residue for residue in paratope_list if residue in aromatic_residues])/len(paratope_list))
-            hydrophobicity.append(len([residue for residue in paratope_list if residue in aliphatic_hydrophobic_residues])/len(paratope_list))
-            charge.append(len([residue for residue in paratope_list if residue in charged_residues])/len(paratope_list))
-            polarity.append(len([residue for residue in paratope_list if residue in polar_residues])/len(paratope_list))
+            aromaticity.append(float(len([residue for residue in paratope_list if residue in aromatic_residues])/len(paratope_list)))
+            hydrophobicity.append(float(len([residue for residue in paratope_list if residue in aliphatic_hydrophobic_residues])/len(paratope_list)))
+            charge.append(float(len([residue for residue in paratope_list if residue in charged_residues])/len(paratope_list)))
+            polarity.append(float(len([residue for residue in paratope_list if residue in polar_residues])/len(paratope_list)))
 
     return aromaticity, hydrophobicity, charge, polarity
 
@@ -67,13 +70,15 @@ def extract_paratope_epitope(pdb_code, region='Paratope'):
     else:
         return ''
 
-def get_cdr_lengths(pdb_codes):
+def get_cdr_lengths(pdb_codes, data_path=DATA_DIR):
     r"""Returns lists with the lengths of the CDR-H1s, CDR-H2s, CDR-H3s, CDR-L1s, CDR-L2s and CDR-L3s. 
 
     Parameters
     ----------
     pdb_codes: list
         The PDB codes of the antibodies.
+    data_path: str
+        Path to the data folder.
 
     """
     cdrl1_l = []
@@ -84,7 +89,7 @@ def get_cdr_lengths(pdb_codes):
     cdrh3_l = []
 
     for pdb_code in pdb_codes:
-        cdrl_parts, cdrh_parts = extract_cdr_lengths(pdb_code)
+        cdrl_parts, cdrh_parts = extract_cdr_lengths(pdb_code, data_path)
         
         cdrl1_l.append(cdrl_parts[0])
         cdrl2_l.append(cdrl_parts[1])
@@ -93,16 +98,20 @@ def get_cdr_lengths(pdb_codes):
         cdrh2_l.append(cdrh_parts[1])
         cdrh3_l.append(cdrh_parts[2])
 
-def extract_cdr_lengths(pdb_code):
+    return cdrh1_l, cdrh2_l, cdrh3_l, cdrl1_l, cdrl2_l, cdrl3_l
+
+def extract_cdr_lengths(pdb_code, data_path):
     r"""Retrieves the CDR lengths of an antibody.
 
     Parameters
     ----------
     pdb_code: str
         The antibody PDB code.
+    data_path: str
+        Path to the data folder.
 
     """
-    res_l = list(np.load(f'data/paired_hl/lists_of_residues/{pdb_code}.npy'))
+    res_l = list(np.load(data_path+f'paired_hl/lists_of_residues/{pdb_code}.npy'))
     h = res_l[1][0]
     l = res_l[-2][0]
     
@@ -147,3 +156,37 @@ def extract_cdr_lengths(pdb_code):
 
         
     return cdrl_parts, cdrh_parts
+
+def remove_nanobodies(pdb_codes, representations, embedding=None, labels=[], numerical_values=None):
+    r"""Returns PDB codes and embeddings without the presence of nanobodies.
+
+    Parameters
+    ----------
+    pdb_codes: list
+        The PDB codes of the antibodies.
+    representations: numpy.ndarray
+        Normal mode correlation maps (or transformed maps) from which it can be inferred whether a given antibody is a nanobody.
+    embedding: numpy.ndarray
+        Low-dimensional version of ``representations``.
+    embedding: numpy.ndarray
+        Low-dimensional version of ``representations``.
+    labels: list
+        Data point labels.
+
+    """
+    input_shape = representations.shape[-1]
+    deleted_items = 0
+
+    for i in range(len(pdb_codes)):
+        if np.count_nonzero(representations[i-deleted_items].reshape(input_shape, input_shape)[-40:,-40:]) == 0:
+            pdb_codes = np.delete(pdb_codes, i-deleted_items, axis=0)
+            representations = np.delete(representations, i-deleted_items, axis=0)
+            if embedding is not None:
+                embedding = np.delete(embedding, i-deleted_items, axis=0)
+            if len(labels):
+                labels = np.delete(labels, i-deleted_items, axis=0)
+            if numerical_values is not None:
+                numerical_values = np.delete(numerical_values, i-deleted_items, axis=0)
+            deleted_items += 1
+    return pdb_codes, representations, embedding, labels, numerical_values
+

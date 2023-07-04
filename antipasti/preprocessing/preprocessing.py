@@ -113,6 +113,8 @@ class Preprocessing(object):
         self.stage = 'training'
         self.file_residues_paths = sorted(glob.glob(os.path.join(self.residues_path, '*.npy')))
         self.alphafold = alphafold
+        self.h_offset = h_offset
+        self.l_offset = l_offset
 
         self.df_path = data_path + df
         self.entries, self.affinity, self.df = self.clean_df()
@@ -123,8 +125,6 @@ class Preprocessing(object):
 
         if self.stage != 'training':
             self.test_data_path = test_data_path
-            self.h_offset = h_offset
-            self.l_offset = l_offset
             self.test_dccm_map_path = self.test_data_path + self.regions + '/' + test_dccm_map_path
             self.test_residues_path = self.test_data_path + self.regions + '/' + test_residues_path
             self.test_structure_path = self.test_data_path + test_structure_path
@@ -507,8 +507,8 @@ class Preprocessing(object):
             
         
         elif self.mode == 'fully-extended':
-            idx_list = [i for i in range(max_res_h) if self.max_res_list_h[i] in current_list_h]
-            idx_list += [i+max_res_h for i in range(max_res_l) if self.max_res_list_l[i] in current_list_l]
+            idx_list = [i-min(2-self.h_offset,0) for i in range(max_res_h+min(2-self.h_offset,0)) if self.max_res_list_h[i] in current_list_h]
+            idx_list += [i+max_res_h-min(2-self.l_offset,0) for i in range(max_res_l+min(2-self.l_offset,0)) if self.max_res_list_l[i] in current_list_l]
             for k, i in enumerate(idx_list):
                 for l, j in enumerate(idx_list):
                     masked[i, j] = img[k, l]

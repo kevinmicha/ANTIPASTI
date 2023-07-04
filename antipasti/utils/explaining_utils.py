@@ -14,6 +14,8 @@ import matplotlib.patches as patches
 from scipy.stats import chi2
 from sklearn.preprocessing import StandardScaler
 
+from antipasti.utils.biology_utils import remove_nanobodies
+
 def get_maps_of_interest(preprocessed_data, learnt_filter, affinity_thr=-8):
     r"""Post-processes both raw data and results to obtain maps of interest.
 
@@ -312,7 +314,7 @@ def map_residues_to_regions(preprocessed_data, epsilon):
 
     return np.array(coord, dtype=object), maps, labels
 
-def compute_umap(preprocessed_data, model, scheme='heavy_species', regions='paired_hl', categorical=True, include_ellipses=False, numerical_values=None, external_cdict=None, interactive=False):
+def compute_umap(preprocessed_data, model, scheme='heavy_species', regions='paired_hl', categorical=True, include_ellipses=False, numerical_values=None, external_cdict=None, interactive=False, exclude_nanobodies=False):
     r"""Performs UMAP dimensionality reduction calculations.
 
     Parameters
@@ -335,6 +337,8 @@ def compute_umap(preprocessed_data, model, scheme='heavy_species', regions='pair
         Option to provide an external dictionary of the UMAP labels.
     interactive: bool
         Set to ``True`` when running a script or Pytest.
+    remove_nanobodies: bool
+        Set to ``True`` to exclude nanobodies from the UMAP plot.
 
     """
     train_x = preprocessed_data.train_x
@@ -353,14 +357,14 @@ def compute_umap(preprocessed_data, model, scheme='heavy_species', regions='pair
     n_filters = model.n_filters
     size_le = int(np.sqrt(model.fc1.weight.data.numpy().shape[-1] / n_filters))
     pdb_codes = preprocessed_data.labels
-    db = pd.read_csv('data/sabdab_summary_all.tsv', sep='\t')
+    db = pd.read_csv(preprocessed_data.data_path+'sabdab_summary_all.tsv', sep='\t')
     if scheme in db.columns:
         db = db.loc[:,['pdb', scheme]]
 
     # Obtaining the labels and the output layer representations
     for j in range(train_x.shape[0]):
         if scheme in db.columns:
-            labels.append(str(db[db['pdb'] == pdb_codes[j]].iloc[0][scheme]))
+            labels.append(str(db[db['pdb'] == pdb_codes[j]].iloc[-1][scheme]))
         inter_filter_item = model(torch.from_numpy(train_x[j].reshape(1, 1, input_shape, input_shape).astype(np.float32)))[1].detach().numpy()
         for i in range(n_filters):
             each_img_enl[j] += cv2.resize(np.multiply(inter_filter_item[0,i], model.fc1.weight.data.numpy().reshape(n_filters, size_le**2)[i].reshape(size_le, size_le)), dsize=(input_shape, input_shape))[:umap_shape, :umap_shape].reshape((umap_shape**2))
@@ -368,6 +372,9 @@ def compute_umap(preprocessed_data, model, scheme='heavy_species', regions='pair
     # UMAP fitting 
     scaled_each_img = StandardScaler().fit_transform(each_img_enl)
     embedding = reducer.fit_transform(scaled_each_img)
+
+    if exclude_nanobodies:
+        pdb_codes, _, embedding, labels, numerical_values = remove_nanobodies(pdb_codes, train_x, embedding, labels, numerical_values)
 
     if categorical:
         if scheme == 'light_subclass':
@@ -434,12 +441,14 @@ def compute_umap(preprocessed_data, model, scheme='heavy_species', regions='pair
         cdict = None
         deleted_items = 0
         for i, item in enumerate(numerical_values):
-            if isinstance(item, (int, float)):
+            if isinstance(item, (int, float, np.int64, np.float32)):
                 colours.append(item)
+            elif item.replace('.', '').isnumeric():
+                colours.append(float(item))
             else:
-                deleted_items += 1
                 embedding = np.delete(embedding, i-deleted_items, axis=0)
-    
+                pdb_codes = np.delete(pdb_codes, i-deleted_items, axis=0)
+                deleted_items += 1
     plot_umap(embedding=embedding, colours=colours, scheme=scheme, pdb_codes=pdb_codes, categorical=categorical, include_ellipses=include_ellipses, cdict=cdict, interactive=interactive)
 
 def plot_umap(embedding, colours, scheme, pdb_codes, categorical=True, include_ellipses=False, cdict=None, interactive=False):
@@ -527,9 +536,9 @@ def plot_umap(embedding, colours, scheme, pdb_codes, categorical=True, include_e
                 ax.add_patch(ellipse)
 
     if categorical:
-        legend1 = ax.legend(legend_patches, cdict.keys(), loc='lower right')
+        legend1 = ax.legend(legend_patches, cdict.keys(), loc='best')
     else:
-        legend1 = ax.legend(legend_patches[:10], set(colours), loc='lower right')
+        legend1 = ax.legend(legend_patches[:10], set(colours), loc='best')
     ax.add_artist(legend1)
 
     ax.set_title(scheme, size=18)

@@ -63,10 +63,11 @@ class TestTraining(unittest.TestCase):
         random_sequence = list(np.linspace(0, 1, num=preprocessed_data.train_x.shape[0]))
         random_sequence_delete = random_sequence.copy()
         random_sequence_delete[0] = 'unknown'
+        random_sequence = [str(random_sequence[0])] + random_sequence[1:]
 
         compute_umap(preprocessed_data, model, scheme='heavy_species', regions='paired_hl', categorical=True, include_ellipses=True, numerical_values=None, external_cdict=None, interactive=True)
         compute_umap(preprocessed_data, model, scheme='light_ctype', regions='paired_hl', categorical=True, include_ellipses=True, numerical_values=None, external_cdict=None, interactive=True)
-        compute_umap(preprocessed_data, model, scheme='heavy_subclass', regions='heavy', categorical=True, include_ellipses=False, numerical_values=None, external_cdict=None, interactive=True)
+        compute_umap(preprocessed_data, model, scheme='heavy_subclass', regions='heavy', categorical=True, include_ellipses=False, numerical_values=None, external_cdict=None, interactive=True, exclude_nanobodies=True)
         compute_umap(preprocessed_data, model, scheme='light_subclass', regions='paired_hl', categorical=True, include_ellipses=False, numerical_values=None, external_cdict=None, interactive=True)
         compute_umap(preprocessed_data, model, scheme='antigen_type', regions='paired_hl', categorical=True, include_ellipses=False, numerical_values=None, external_cdict=None, interactive=True)
         compute_umap(preprocessed_data, model, scheme='antigen_species', regions='paired_hl', categorical=True, include_ellipses=False, numerical_values=None, external_cdict=cdict, interactive=True)
