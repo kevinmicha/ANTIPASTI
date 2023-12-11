@@ -20,8 +20,6 @@ parser.add_argument('--pooling_size', dest='pooling_size', type=int,
                     default=1, help='Size of the max pooling operation.')
 parser.add_argument('--modes', dest='modes', type=int,
                     default=30, help='Normal modes into consideration.')
-parser.add_argument('--regions', dest='regions', type=str,
-                    default='paired_hl', help='Choose between paired_hl (heavy chain, light chain and their interactions) and heavy (heavy chain only).')
 parser.add_argument('--learning_rate', dest='learning_rate', type=float,
                     default=4e-4, help='Step size at each iteration.')
 parser.add_argument('--n_max_epochs', dest='n_max_epochs', type=int,
@@ -79,9 +77,9 @@ def main(args):
     test_losses.extend(test_loss)
 
     ## Saving Neural Network checkpoint
-    path = CHECKPOINTS_DIR + 'model_' + regions + '_epochs_' + str(n_max_epochs) + '_modes_' + str(modes) + '_pool_' + str(pooling_size) + '_filters_' + str(n_filters) + '_size_' + str(filter_size) + '.pt'
+    path = CHECKPOINTS_DIR + 'model_epochs_' + str(n_max_epochs) + '_modes_' + str(modes) + '_pool_' + str(pooling_size) + '_filters_' + str(n_filters) + '_size_' + str(filter_size) + '.pt'
     save_checkpoint(path, model, optimiser, train_losses, test_losses)
-    np.save(CHECKPOINTS_DIR+'learnt_filter_'+regions+'_epochs_'+str(n_max_epochs)+'_modes_'+str(modes)+'_pool_'+str(pooling_size)+'_filters_'+str(n_filters)+'_size_'+str(filter_size)+'.npy', learnt_filter)
+    np.save(CHECKPOINTS_DIR+'learnt_filter_epochs_'+str(n_max_epochs)+'_modes_'+str(modes)+'_pool_'+str(pooling_size)+'_filters_'+str(n_filters)+'_size_'+str(filter_size)+'.npy', learnt_filter)
 
 if __name__ == '__main__':
     main(arguments)

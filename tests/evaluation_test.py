@@ -18,7 +18,6 @@ class TestTraining(unittest.TestCase):
         self.pooling_size = 1
         self.n_max_epochs = 552
         self.data_path = 'data/'
-        self.regions = 'paired_hl'
         self.df = 'summary.tsv'
         self.test_data_path = os.path.join('notebooks/', 'test_data/')
         self.test_dccm_map_path = 'dccm_map/'
@@ -30,7 +29,7 @@ class TestTraining(unittest.TestCase):
 
     def test_evaluation(self):
 
-        preprocessed_data = Preprocessing(data_path=self.data_path, modes=self.modes, pathological=self.pathological, regions=self.regions, stage=self.stage, test_data_path=self.test_data_path, test_dccm_map_path=self.test_dccm_map_path, test_residues_path=self.test_residues_path, test_structure_path=self.test_structure_path)
+        preprocessed_data = Preprocessing(data_path=self.data_path, modes=self.modes, pathological=self.pathological, stage=self.stage, test_data_path=self.test_data_path, test_dccm_map_path=self.test_dccm_map_path, test_residues_path=self.test_residues_path, test_structure_path=self.test_structure_path)
         input_shape = preprocessed_data.test_x.shape[-1]
 
         # Testing cases of load checkpoint

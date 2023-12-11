@@ -52,28 +52,3 @@ class TestTraining(unittest.TestCase):
         # Saving the checkpoint
         path = 'checkpoints/model_unit_test.pt'
         save_checkpoint(path, model, optimiser, train_losses, test_losses)
-
-    def test_training_heavy(self):
-        preprocessed_data = Preprocessing(data_path=self.data_path, structures_path=self.structures_path, scripts_path=self.scripts_path, df=self.df, regions='heavy', pathological=self.pathological)
-        train_x, test_x, train_y, test_y, _, _ = create_test_set(preprocessed_data.train_x, preprocessed_data.train_y, test_size=0.5)
-
-        n_filters = 3
-        filter_size = 5
-        pooling_size = 2
-        learning_rate = 4e-4
-        n_max_epochs = 10
-        max_corr = 0.87
-        batch_size = 1
-        input_shape = preprocessed_data.train_x.shape[-1]
-
-        model = ANTIPASTI(n_filters=n_filters, filter_size=filter_size, pooling_size=pooling_size, input_shape=input_shape)
-        criterion = MSELoss()
-        optimiser = AdaBelief(model.parameters(), lr=learning_rate, eps=1e-8, print_change_log=False) 
-
-        train_losses = []
-        test_losses = []
-        train_loss, test_loss, _, _, _ = training_routine(model, criterion, optimiser, train_x, test_x, train_y, test_y, n_max_epochs=n_max_epochs, max_corr=max_corr, batch_size=batch_size, verbose=False)
-
-        # Saving the losses
-        train_losses.extend(train_loss)
-        test_losses.extend(test_loss)
