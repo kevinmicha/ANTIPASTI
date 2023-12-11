@@ -144,11 +144,26 @@ checkpoints/full_ags_all_modes/seed_23/
 checkpoints/full_ags_all_modes/seed_398/
 checkpoints/full_ags_all_modes/seed_447/
 checkpoints/full_ags_all_modes/seed_917/
+checkpoints/full_ags_n_modes/250_modes/
+checkpoints/full_ags_n_modes/50_modes/
+checkpoints/full_ags_n_modes/30_modes/
+checkpoints/full_ags_n_modes/15_modes/
 
 # Data not used
 data/contact_maps_explorer/
 data/contact_maps_with_antigen_explorer/
 notebooks/biological_properties/
 
+# Part of the data (too heavy)
+data/dccm_maps_agnostic_15
+data/dccm_maps_agnostic_30
+data/dccm_maps_full_ags_15
+data/dccm_maps_full_ags_30
+data/dccm_maps_full_ags_50
+data/dccm_maps_full_ags_250
+
 # Raw notebooks
 notebooks/explainability_raw.ipynb
+
+# Scripts
+scripts/measure_all_distances.py

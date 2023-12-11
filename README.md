@@ -62,8 +62,8 @@ The full documentation can be found [here](https://kevinmicha.github.io/ANTIPAST
 Example notebooks are located in the [notebooks](https://github.com/kevinmicha/ANTIPASTI/tree/main/notebooks) folder:
 * [[Tutorial] Training ANTIPASTI](https://github.com/kevinmicha/ANTIPASTI/blob/main/notebooks/%5BTutorial%5D%20Training%20ANTIPASTI.ipynb)
 * [[Tutorial] Predicting affinity using ANTIPASTI](https://github.com/kevinmicha/ANTIPASTI/blob/main/notebooks/%5BTutorial%5D%20Predicting%20affinity%20using%20ANTIPASTI.ipynb)
-* [[Tutorial] Explaining affinity using ANTIPASTI](https://github.com/kevinmicha/ANTIPASTI/blob/main/notebooks/%5BTutorial%5D%20Explaining%20affinity%20using%20ANTIPASTI.ipynb)
-* [[Analysis] AlphaFold can be useful if only sequences are available](https://github.com/kevinmicha/ANTIPASTI/blob/main/notebooks/%5BAnalysis%5D%20AlphaFold%20can%20be%20useful%20if%20only%20sequences%20are%20available.ipynb)
+* [[Tutorial] Explaining binding affinity with ANTIPASTI](https://github.com/kevinmicha/ANTIPASTI/blob/main/notebooks/%5BTutorial%5D%20Explaining%20binding%20affinity%20with%20ANTIPASTI.ipynb)
+* [[Tutorial] Combining AlphaFold and ANTIPASTI](https://github.com/kevinmicha/ANTIPASTI/blob/main/notebooks/%5BTutorial%5D%20Combining%20AlphaFold%20and%20ANTIPASTI.ipynb)
 
 ## Attribution
 
