@@ -43,9 +43,11 @@ python setup.py install --user
 
 ANTIPASTI requires the following Python packages: 
 * `adabelief-pytorch`
+* `biopython`
 * `matplotlib`
 * `numpy`
 * `opencv-python`
+* `optuna`
 * `pandas`
 * `scikit-learn`
 * `torch`

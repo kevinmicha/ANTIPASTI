@@ -128,3 +128,27 @@ dmypy.json
 # Pyre type checker
 .pyre/
 .DS_Store
+
+# Checkpoints (too heavy to upload them all)
+checkpoints/agnostic_all_modes/seed_13/
+checkpoints/agnostic_all_modes/seed_23/
+checkpoints/agnostic_all_modes/seed_398/
+checkpoints/agnostic_all_modes/seed_447/
+checkpoints/contact_maps/seed_13/
+checkpoints/contact_maps/seed_23/
+checkpoints/contact_maps/seed_398/
+checkpoints/contact_maps/seed_447/
+checkpoints/contact_maps/seed_917/
+checkpoints/full_ags_all_modes/seed_13/
+checkpoints/full_ags_all_modes/seed_23/
+checkpoints/full_ags_all_modes/seed_398/
+checkpoints/full_ags_all_modes/seed_447/
+checkpoints/full_ags_all_modes/seed_917/
+
+# Data not used
+data/contact_maps_explorer/
+data/contact_maps_with_antigen_explorer/
+notebooks/biological_properties/
+
+# Raw notebooks
+notebooks/explainability_raw.ipynb

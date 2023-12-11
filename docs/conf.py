@@ -20,7 +20,7 @@ autodoc_mock_imports = ['adabelief_pytorch', 'bs4', 'cv2', 'matplotlib', 'numpy'
 
 project = u'ANTIPASTI'
 copyright = u'2023, Kevin Michalewicz et al'
-author = u'Kevin Michalewicz, Barbara Bravi, Mauricio Barahona'
+author = u'Kevin Michalewicz, Mauricio Barahona, Barbara Bravi'
 
 # The full version, including alpha/beta/rc tags
 release = u'1.0'
@@ -118,7 +118,7 @@ latex_elements = {
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
     (master_doc, 'ANTIPASTI.tex', u'ANTIPASTI Documentation',
-     u'Kevin Michalewicz, Barbara Bravi, Mauricio Barahona', 'manual'),
+     u'Kevin Michalewicz, Mauricio Barahona, Barbara Bravi', 'manual'),
 ]
 
 

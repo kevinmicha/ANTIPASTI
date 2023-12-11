@@ -8,5 +8,5 @@ Core developer:
 
 Supervisors:
 
-- Barbara Bravi [[Website](https://www.imperial.ac.uk/people/b.bravi21)|[Github](https://github.com/bravib)|[Email](mailto:b.bravi21@imperial.ac.uk?subject=[GitHub]%20ANTIPASTI)]
 - Mauricio Barahona [[Website](https://www.imperial.ac.uk/people/m.barahona/)|[Github](https://github.com/mauriciobarahona)|[Email](mailto:m.barahona@imperial.ac.uk?subject=[GitHub]%20ANTIPASTI)]
+- Barbara Bravi [[Website](https://www.imperial.ac.uk/people/b.bravi21)|[Github](https://github.com/bravib)|[Email](mailto:b.bravi21@imperial.ac.uk?subject=[GitHub]%20ANTIPASTI)]

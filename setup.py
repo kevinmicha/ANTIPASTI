@@ -20,6 +20,6 @@ setup(
     author_email='k.michalewicz22@imperial.ac.uk',
     description='Deep Learning model that predicts the binding affinity of antibodies from their sequence and three-dimensional structure.',
     packages=['antipasti', 'antipasti.model', 'antipasti.preprocessing', 'antipasti.utils'],
-    install_requires=['adabelief-pytorch', 'beautifulsoup4', 'matplotlib', 'numpy', 'opencv-python', 'pandas', 'requests', 'scikit-learn', 'scipy', 'torch', 'torchmetrics', 'umap-learn'],
+    install_requires=['adabelief-pytorch', 'beautifulsoup4', 'biopython', 'matplotlib', 'numpy', 'opencv-python', 'optuna', 'pandas', 'requests', 'scikit-learn', 'scipy', 'torch', 'torchmetrics', 'umap-learn'],
     cmdclass={'test': PyTest}
 )

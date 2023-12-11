@@ -16,5 +16,7 @@ dependencies:
   - pip:
     - adabelief-pytorch>=0.2.1
     - beautifulsoup4>=4.12.2
+    - biopython>=1.79
     - opencv-python>=4.7.0.68
+    - optuna>=3.1.1
     - torch>=1.13.1

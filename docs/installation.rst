@@ -7,7 +7,7 @@ Requirements
 
 ANTIPASTI is developed using Python 3.8, 3.9, 3.10 and 3.11 and might be fine with older versions.
 
-It requires ``adabelief-pytorch``, ``matplotlib``, ``numpy``, ``opencv-python``, ``pandas``, ``scikit-learn``, ``scipy``, ``torch``, and ``torchmetrics`` to work properly. 
+It requires ``adabelief-pytorch``, ``biopython``, ``matplotlib``, ``numpy``, ``opencv-python``, ``optuna``, ``pandas``, ``scikit-learn``, ``scipy``, ``torch``, and ``torchmetrics`` to work properly. 
 
 Through Anaconda 
 ----------------

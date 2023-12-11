@@ -7,7 +7,7 @@ from torch.autograd import Variable
 
 from antipasti.model.model import ANTIPASTI
 
-def create_test_set(train_x, train_y, test_size=None):
+def create_test_set(train_x, train_y, test_size=None, random_state=0):
     r"""Creates the test set given a set of input images and their corresponding labels.
 
     Parameters
@@ -34,20 +34,7 @@ def create_test_set(train_x, train_y, test_size=None):
 
     # Splitting
     indices = np.arange(len(train_x))
-    if test_size == None:
-        #indices_test = [44, 63, 94, 119, 144, 149, 254, 290, 328, 357, 402, 426, 464, 489, 604, 634]
-        #indices_test = [44, 62, 91, 116, 141, 146, 250, 284, 322, 349, 389, 410, 447, 471, 574, 604]
-        indices_test = [44, 62, 91, 116, 141, 146, 216, 250, 284, 388, 409, 470, 501, 573, 603, 648]
-        np.random.shuffle(indices_test)
-        indices_train = np.delete(indices, indices_test, axis=0)
-
-        test_x = train_x[indices_test]
-        test_y = train_y[indices_test]
-
-        train_x = np.delete(train_x, indices_test, axis=0)
-        train_y = np.delete(train_y, indices_test, axis=0)
-    else:
-        train_x, test_x, train_y, test_y, indices_train, indices_test = train_test_split(train_x, train_y, indices, test_size=test_size, random_state=9)
+    train_x, test_x, train_y, test_y, indices_train, indices_test = train_test_split(train_x, train_y, indices, test_size=test_size, random_state=random_state)
 
     # Converting to tensors
     train_x = train_x.reshape(train_x.shape[0], 1, train_x.shape[1], train_x.shape[1])
@@ -116,7 +103,8 @@ def training_step(model, criterion, optimiser, train_x, test_x, train_y, test_y,
     # Filters before the fully-connected layer
     size_inter = int(np.sqrt(model.fully_connected_input/model.n_filters))
     inter_filter = np.zeros((x_train.size()[0], model.n_filters, size_inter, size_inter))
-    
+    if model.mode != 'full':
+        inter_filter = np.zeros((x_train.size()[0], 1, model.input_shape, model.input_shape))
     #perm_paired = []
     #perm_nano = []
     permutation = torch.randperm(x_train.size()[0])
@@ -131,7 +119,6 @@ def training_step(model, criterion, optimiser, train_x, test_x, train_y, test_y,
     #permutation = perm_nano + perm_paired
 
     for i in range(0, x_train.size()[0], batch_size):
-        
         indices = permutation[i:i+batch_size]
         batch_x, batch_y = x_train[indices], y_train[indices]
         
@@ -158,7 +145,8 @@ def training_step(model, criterion, optimiser, train_x, test_x, train_y, test_y,
         l1_loss = model.l1_regularization_loss()
         mse_loss = criterion(output_train[:, 0], batch_y[:, 0])
         loss_train = mse_loss + l1_loss
-        print(l1_loss)
+        if verbose:
+            print(l1_loss)
         loss_train.backward()
         optimiser.step()
         # Adding batch contribution to training loss
@@ -168,20 +156,24 @@ def training_step(model, criterion, optimiser, train_x, test_x, train_y, test_y,
     train_losses.append(tr_loss)
     loss_test = 0
     output_test = []
-    for i in range(x_test.size()[0]):
-        output_t, _ = model(x_test[i].reshape(1, 1, model.input_shape, model.input_shape))
-        l1_loss = model.l1_regularization_loss()
-        loss_t = criterion(output_t[:, 0], y_test[i][:, 0])
-        loss_test += loss_t.item() / x_test.size()[0]
-        if verbose:
-            print(output_t)
-            print(y_test[i])
-            print('------------------------')
-        output_test.append(output_t[:,0].detach().numpy())
+
+    with torch.no_grad():
+        for i in range(x_test.size()[0]):
+            optimiser.zero_grad()
+            output_t, _ = model(x_test[i].reshape(1, 1, model.input_shape, model.input_shape))
+            l1_loss = model.l1_regularization_loss()
+            loss_t = criterion(output_t[:, 0], y_test[i][:, 0])
+            loss_test += loss_t.item() / x_test.size()[0]
+            if verbose:
+                print(output_t)
+                print(y_test[i])
+                print('------------------------')
+            output_test.append(output_t[:,0].detach().numpy())
     test_losses.append(loss_test)
     
     # Training and test losses
-    print('Epoch : ', epoch+1, '\t', 'train loss: ', tr_loss, 'train MSE: ', tr_mse, 'test MSE: ', loss_test)
+    if verbose:
+        print('Epoch : ', epoch+1, '\t', 'train loss: ', tr_loss, 'train MSE: ', tr_mse, 'test MSE: ', loss_test)
 
         
     return train_losses, test_losses, inter_filter, y_test, output_test
@@ -289,7 +281,7 @@ def load_checkpoint(path, input_shape, n_filters=None, pooling_size=None, filter
 
     checkpoint = torch.load(path)
     model.load_state_dict(checkpoint['model_state_dict'])
-    optimiser = AdaBelief(model.parameters(), eps=1e-8, print_change_log=False) 
+    optimiser = AdaBelief(model.parameters()) 
     optimiser.load_state_dict(checkpoint['optimiser_state_dict'])
     n_epochs = checkpoint['epoch']
     train_losses = checkpoint['tr_loss']

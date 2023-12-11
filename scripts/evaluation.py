@@ -16,8 +16,6 @@ parser.add_argument('--pooling_size', dest='pooling_size', type=int,
                     default=1, help='Size of the max pooling operation saved in the checkpoint.')
 parser.add_argument('--modes', dest='modes', type=int,
                     default=30, help='Normal modes into consideration when training.')
-parser.add_argument('--regions', dest='regions', type=str,
-                    default='paired_hl', help='Choose between paired_hl (heavy chain, light chain and their interactions) and heavy (heavy chain only).')
 parser.add_argument('--n_max_epochs', dest='n_max_epochs', type=int,
                     default=120, help='Number of times the whole dataset went through the model when training.')
 arguments = parser.parse_args()
@@ -41,7 +39,7 @@ def main(args):
     input_shape = preprocessed_data.test_x.shape[-1]
     
     # Loading an ANTIPASTI checkpoint
-    path = CHECKPOINTS_DIR + 'model_' + regions + '_epochs_' + str(n_max_epochs) + '_modes_' + str(modes) + '_pool_' + str(pooling_size) + '_filters_' + str(n_filters) + '_size_' + str(filter_size) + '.pt'
+    path = CHECKPOINTS_DIR + 'model_epochs_' + str(n_max_epochs) + '_modes_' + str(modes) + '_pool_' + str(pooling_size) + '_filters_' + str(n_filters) + '_size_' + str(filter_size) + '.pt'
     model = load_checkpoint(path, input_shape)[0]
     model.eval()
 

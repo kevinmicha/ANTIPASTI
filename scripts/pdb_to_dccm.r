@@ -17,7 +17,7 @@ if(str_equal(args[3], "all")){
 } else{
   nmodes <- as.integer(args[3]) 
 }
-print(nmodes)
+
 pdb <- read.pdb(args[1])
 modes <- suppressMessages(suppressWarnings(quiet(nma(pdb))))
 cm <- suppressMessages(suppressWarnings(quiet(dccm(modes, nmodes=nmodes))))
