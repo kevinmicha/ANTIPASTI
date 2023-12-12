@@ -37,6 +37,7 @@ class TestTraining(unittest.TestCase):
         batch_size = 1
         input_shape = preprocessed_data.train_x.shape[-1]
 
+        model_l = ANTIPASTI(n_filters=n_filters, filter_size=filter_size, pooling_size=pooling_size, input_shape=input_shape, mode='linear')
         model = ANTIPASTI(n_filters=n_filters, filter_size=filter_size, pooling_size=pooling_size, input_shape=input_shape)
         criterion = MSELoss()
         optimiser = AdaBelief(model.parameters(), lr=learning_rate, eps=1e-8, print_change_log=False) 

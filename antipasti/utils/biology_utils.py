@@ -31,7 +31,9 @@ def extract_mean_region_lengths(pdb_codes, data_path=DATA_DIR):
             cdrh1_b = res_l.index(h+' 29 ')
         else:
             cdrh1_b = res_l.index(h+' 30 ')
-
+            print('loser')
+            print(pdb_code)
+            
         # Problems beginning CDR-H2
         if h+' 52 ' in res_l:
             cdrh2_b = res_l.index(h+' 52 ')
