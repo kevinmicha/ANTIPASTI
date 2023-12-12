@@ -7,7 +7,7 @@ r"""This module contains the model class.
 """
 import numpy as np
 import torch
-from torch.nn import Linear, ReLU, Conv2d, MaxPool2d, Module, Dropout, Parameter
+from torch.nn import Linear, ReLU, Conv2d, MaxPool2d, Module
 
 class ANTIPASTI(Module):
     r"""Predicting the binding affinity of an antibody from its normal mode correlation map.
@@ -25,7 +25,7 @@ class ANTIPASTI(Module):
     l1_lambda: float
         Weight of L1 regularisation.
     mode: str
-        To use the full model, provide ``full``. Otherwise, ANTIPASTI corresponds to a linear classifier.
+        To use the full model, provide ``full``. Otherwise, ANTIPASTI corresponds to a linear map.
 
     """
     def __init__(
@@ -47,12 +47,10 @@ class ANTIPASTI(Module):
             self.fully_connected_input = n_filters * ((input_shape-filter_size+1)//pooling_size) ** 2
             self.conv1 = Conv2d(1, n_filters, filter_size)
             self.pool = MaxPool2d(pooling_size, pooling_size)
-            #self.dropit = Dropout(p=0.05)
             self.relu = ReLU()
         else:
             self.fully_connected_input = self.input_shape ** 2
         self.fc1 = Linear(self.fully_connected_input, 1, bias=False)
-        #self.fc2 = Linear(4, 1, bias=False)
         self.l1_lambda = l1_lambda
 
     def forward(self, x):
@@ -72,10 +70,7 @@ class ANTIPASTI(Module):
             x = self.relu(x)
             inter = x = self.pool(x)
         x = x.view(x.size(0), -1)
-        #if self.mode == 'full':
-        #    x = self.dropit(x)
         x = self.fc1(x)
-        #x = self.fc2(x)
 
         return x.float(), inter
 

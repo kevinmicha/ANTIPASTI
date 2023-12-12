@@ -18,6 +18,8 @@ def create_test_set(train_x, train_y, test_size=None, random_state=0):
         Labels.
     test_size: float
         Fraction of original samples to be included in the test set.
+    random_state: int
+        Set lot number.
 
     Returns
     -------
@@ -105,18 +107,7 @@ def training_step(model, criterion, optimiser, train_x, test_x, train_y, test_y,
     inter_filter = np.zeros((x_train.size()[0], model.n_filters, size_inter, size_inter))
     if model.mode != 'full':
         inter_filter = np.zeros((x_train.size()[0], 1, model.input_shape, model.input_shape))
-    #perm_paired = []
-    #perm_nano = []
     permutation = torch.randperm(x_train.size()[0])
-    #for i in range(x_train.size()[0]):
-    #    if torch.numel(torch.nonzero(x_train[i,0,-80:,-80:])) == 0:
-    #        perm_nano.append(i)
-    #    else:
-    #        perm_paired.append(i)
-    #np.random.shuffle(perm_nano)
-    #np.random.shuffle(perm_paired)
-    #print(len(perm_nano))
-    #permutation = perm_nano + perm_paired
 
     for i in range(0, x_train.size()[0], batch_size):
         indices = permutation[i:i+batch_size]
@@ -130,17 +121,6 @@ def training_step(model, criterion, optimiser, train_x, test_x, train_y, test_y,
         inter_filter[i:i+batch_size] = inter_filters_detached.numpy()
 
         # Training loss, clearing gradients and updating weights
-        #def closure():
-        #    optimiser.zero_grad()
-        #    output_train, inter_filters = model(batch_x)
-        #    loss_train = criterion(output_train[:, 0], batch_y[:, 0])
-        #    loss_train.backward()
-        #    return loss_train
-
-        #optimiser.step(closure)
-
-        #with torch.no_grad():
-        #    loss_train = criterion(output_train[:, 0], batch_y[:, 0]).detach()
         optimiser.zero_grad()
         l1_loss = model.l1_regularization_loss()
         mse_loss = criterion(output_train[:, 0], batch_y[:, 0])
@@ -246,10 +226,10 @@ def load_checkpoint(path, input_shape, n_filters=None, pooling_size=None, filter
         Shape of the normal mode correlation maps.
     n_filters: int
         Number of filters in the convolutional layer.
-    filter_size: int
-        Size of filters in the convolutional layer.
     pooling_size: int
         Size of the max pooling operation.
+    filter_size: int
+        Size of filters in the convolutional layer.
     
     Returns
     -------

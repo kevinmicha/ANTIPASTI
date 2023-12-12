@@ -46,6 +46,14 @@ class Preprocessing(object):
         Compute all the normal mode correlation maps.
     renew_residues: bool
         Retrieve the lists of residues for each entry.
+    cmaps: bool
+        If ``True``, ANTIPASTI computes the contact maps of the complexes instead of the Normal Modes.
+    cmaps_thr: float
+        Thresholding distance for alpha (α) carbons to build the contact maps.
+    ag_agnostic: bool
+        If ``True``, Normal Mode correlation maps are computed in complete absence of the antigen.
+    affinity_entries_only: bool
+        This is ``False`` in general, but the ANTIPASTI pipeline could be used to other types of projects and thus consider data without affinity values.
     stage: str
         Choose between ``training`` and ``predicting``.
     test_data_path: str
@@ -64,7 +72,7 @@ class Preprocessing(object):
         Amount of absent residues between positions 1 and 25 in the heavy chain.
     l_offset: int
         Amount of absent residues between positions 1 and 23 in the light chain.
-
+        
     """
 
     def __init__(

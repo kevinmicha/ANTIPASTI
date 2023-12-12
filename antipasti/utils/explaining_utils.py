@@ -58,6 +58,16 @@ def get_maps_of_interest(preprocessed_data, learnt_filter, affinity_thr=-8):
     return mean_learnt, mean_image, mean_diff_image
 
 def get_output_representations(preprocessed_data, model):
+    r"""Returns maps that reveal the important residue interactions for the binding affinity. We call them 'output layer representations'.
+
+    Parameters
+    ----------
+    preprocessed_data: antipasti.preprocessing.preprocessing.Preprocessing
+        The ``Preprocessing`` class.
+    model: antipasti.model.model.ANTIPASTI
+        The model class, i.e., ``ANTIPASTI``.
+
+    """
     input_shape = preprocessed_data.test_x.shape[-1]
     each_img_enl = np.zeros((preprocessed_data.train_x.shape[0], input_shape**2))
     size_le = int(np.sqrt(model.fc1.weight.data.numpy().shape[-1] / model.n_filters))
@@ -110,7 +120,7 @@ def plot_map_with_regions(preprocessed_data, map, title='Normal mode correlation
     title: str
         The image title.
     interactive: bool
-        Set to ``True`` when running a script or Pytest.
+        Set to ``True`` when running a script or ``pytest``.
 
     """
     # Font sizes
@@ -212,8 +222,8 @@ def compute_umap(preprocessed_data, model, scheme='heavy_species', categorical=T
     external_cdict: dictionary
         Option to provide an external dictionary of the UMAP labels.
     interactive: bool
-        Set to ``True`` when running a script or Pytest.
-    remove_nanobodies: bool
+        Set to ``True`` when running a script or ``pytest``.
+    exclude_nanobodies: bool
         Set to ``True`` to exclude nanobodies from the UMAP plot.
 
     """
@@ -337,8 +347,10 @@ def plot_umap(embedding, colours, scheme, pdb_codes, categorical=True, include_e
         ``True`` if ``scheme`` is categorical.
     include_ellipses: bool
         ``True`` to include ellipses comprising 85% of the points of a given class.
+    cdict: dictionary
+        External dictionary of the UMAP labels.
     interactive: bool
-        Set to ``True`` when running a script or Pytest.
+        Set to ``True`` when running a script or ``pytest``.
 
     """
     fig = plt.figure(figsize=(20,20))
@@ -411,6 +423,22 @@ def plot_umap(embedding, colours, scheme, pdb_codes, categorical=True, include_e
         plt.close('all')
 
 def plot_region_importance(importance_factor, importance_factor_ob, antigen_type, mode='region', interactive=False):
+    r"""Plots ranking of important regions.
+
+    Parameters
+    ----------
+    importance_factor: list
+        Measure of importance (0-100) for each antibody region.
+    importance_factor_ob: list
+        Measure of importance (0-100) for each antibody region attributable to off-block correlations. This can be inter-region or inter-chain depending on the selected ``mode``.
+    antigen_type: int
+        Plot corresponding to antigens of a given type. These can be proteins (0), haptens (1), peptides (2) or carbohydrates (3).
+    mode: str
+        ``region`` to explicitely show which correlations are inter/intra-region (likewise for ``chain``).
+    interactive: bool
+        Set to ``True`` when running a script or ``pytest``.
+
+    """
 
     labels = ['FR-H1', 'CDR-H1', 'FR-H2', 'CDR-H2', 'FR-H3', 'CDR-H3', 'FR-H4', 'FR-L1', 'CDR-L1', 'FR-L2', 'CDR-L2', 'FR-L3', 'CDR-L3', 'FR-L4']
     mapping_dict = {0: 0, 1: 2, 2: 1, 3: 5}
@@ -446,7 +474,7 @@ def plot_region_importance(importance_factor, importance_factor_ob, antigen_type
         plt.close('all')
 
 def add_region_based_on_range(list_residues):
-
+    r"""Given a list of residues in Chothia numbering, this function adds the corresponding regions in brackets for each of them."""
     output_list_residues = []
 
     new_coord = np.array([range(0, 26), range(26, 38), range(38, 57), range(57, 67), range(67, 116), range(116, 142),
@@ -463,6 +491,20 @@ def add_region_based_on_range(list_residues):
     return output_list_residues
 
 def plot_residue_importance(preprocessed_data, importance_factor, antigen_type, interactive=False):
+    r"""Plots ranking of important residues.
+
+    Parameters
+    ----------
+    preprocessed_data: antipasti.preprocessing.preprocessing.Preprocessing
+        The ``Preprocessing`` class.
+    importance_factor: list
+        Measure of importance (0-100) for each antibody residue.
+    antigen_type: int
+        Plot corresponding to antigens of a given type. These can be proteins (0), haptens (1), peptides (2) or carbohydrates (3).
+    interactive: bool
+        Set to ``True`` when running a script or ``pytest``.
+
+    """
 
     res_labels = add_region_based_on_range(preprocessed_data.max_res_list_h+preprocessed_data.max_res_list_l)
     mapping_dict = {0: 0, 1: 2, 2: 1, 3: 5}
@@ -495,6 +537,14 @@ def plot_residue_importance(preprocessed_data, importance_factor, antigen_type, 
 
 
 def get_colours_ag_type(preprocessed_data):
+    r"""Returns a different colour according to the antigen type.
+
+    Parameters
+    ----------
+    preprocessed_data: antipasti.preprocessing.preprocessing.Preprocessing
+        The ``Preprocessing`` class.
+    
+    """
 
     cluster_according_to = 'antigen_type'
     db = pd.read_csv(preprocessed_data.data_path+'sabdab_summary_all.tsv', sep='\t')
@@ -522,7 +572,25 @@ def get_colours_ag_type(preprocessed_data):
     return colours 
 
 def compute_region_importance(preprocessed_data, model, type_of_antigen, nanobodies, mode='region', interactive=False):
-    
+    r"""Computes the importance factors (0-100) of all the Fv antibody regions.
+
+    Parameters
+    ----------
+    preprocessed_data: antipasti.preprocessing.preprocessing.Preprocessing
+        The ``Preprocessing`` class.
+    model: antipasti.model.model.ANTIPASTI
+        The model class, i.e., ``ANTIPASTI``.
+    type_of_antigen: int
+        Choose between: proteins (0), haptens (1), peptides (2) or carbohydrates (3).
+    nanobodies: list
+        PDB codes of nanobodies in the dataset.
+    mode: str
+        ``region`` to explicitely calculate which correlations are inter/intra-region (likewise for ``chain``).
+    interactive: bool
+        Set to ``True`` when running a script or ``pytest``.
+
+    """
+
     colours = get_colours_ag_type(preprocessed_data)
     each_img_enl = get_output_representations(preprocessed_data, model)
 
@@ -581,6 +649,22 @@ def compute_region_importance(preprocessed_data, model, type_of_antigen, nanobod
     plot_region_importance(tot, ob, type_of_antigen, mode, interactive=interactive)
 
 def compute_residue_importance(preprocessed_data, model, type_of_antigen, nanobodies, interactive=False):
+    r"""Computes the importance factors (0-100) of all the amino acids of the antibody variable region.
+
+    Parameters
+    ----------
+    preprocessed_data: antipasti.preprocessing.preprocessing.Preprocessing
+        The ``Preprocessing`` class.
+    model: antipasti.model.model.ANTIPASTI
+        The model class, i.e., ``ANTIPASTI``.
+    type_of_antigen: int
+        Choose between: proteins (0), haptens (1), peptides (2) or carbohydrates (3).
+    nanobodies: list
+        PDB codes of nanobodies in the dataset.
+    interactive: bool
+        Set to ``True`` when running a script or ``pytest``.
+
+    """
 
     colours = get_colours_ag_type(preprocessed_data)
     each_img_enl = get_output_representations(preprocessed_data, model)

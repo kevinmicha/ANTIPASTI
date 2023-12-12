@@ -90,6 +90,8 @@ def remove_nanobodies(pdb_codes, representations, embedding=None, labels=[], num
         Low-dimensional version of ``representations``.
     labels: list
         Data point labels.
+    numerical_values: list
+        If data is numerical (e.g., affinity values), it is necessary to include a list here. In this way, values associated to nanobodies can be removed.
 
     """
     input_shape = representations.shape[-1]
