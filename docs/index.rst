@@ -6,7 +6,7 @@
 Welcome to ANTIPASTI's documentation!
 =====================================
 
-.. image:: _static/cover_image.png
+.. image:: _static/cover_image.jpg
 	:align: center
 
 
