@@ -1,7 +1,7 @@
 import pytest
 import unittest
 
-from antipasti.utils.biology_utils import get_cdr_lengths, get_types_of_residues
+from antipasti.utils.biology_utils import extract_mean_region_lengths
 
 from tests import TEST_PATH
 
@@ -10,5 +10,5 @@ class TestTraining(unittest.TestCase):
         self.path = TEST_PATH
 
     def test_biology(self):
-        get_cdr_lengths(['1fl6', '4fab', '5d70', '1kxt', '1g6v', '2p44', '2jb6', '6b9j'], 'data/')
-        get_types_of_residues(['1t66', '1kel', '6mlb', 'abcd'])
+        extract_mean_region_lengths(['1fl6'], data_path=self.path+'/data/')
+        extract_mean_region_lengths(['5d70'], data_path='data/')

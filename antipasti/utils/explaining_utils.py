@@ -240,10 +240,7 @@ def compute_umap(preprocessed_data, model, scheme='heavy_species', categorical=T
     embedding = reducer.fit_transform(scaled_each_img)
 
     if exclude_nanobodies:
-        if scheme == 'similarity':
-            pdb_codes, _, embedding, labels, _ = remove_nanobodies(pdb_codes, train_x, embedding, labels, None)
-        else:
-            pdb_codes, _, embedding, labels, numerical_values = remove_nanobodies(pdb_codes, train_x, embedding, labels, numerical_values)
+        pdb_codes, _, embedding, labels, numerical_values = remove_nanobodies(pdb_codes, train_x, embedding, labels, numerical_values)
 
     if categorical:
         if scheme == 'light_subclass':
@@ -524,7 +521,7 @@ def get_colours_ag_type(preprocessed_data):
 
     return colours 
 
-def compute_region_importance(preprocessed_data, model, type_of_antigen, nanobodies, mode='region'):
+def compute_region_importance(preprocessed_data, model, type_of_antigen, nanobodies, mode='region', interactive=False):
     
     colours = get_colours_ag_type(preprocessed_data)
     each_img_enl = get_output_representations(preprocessed_data, model)
@@ -581,9 +578,9 @@ def compute_region_importance(preprocessed_data, model, type_of_antigen, nanobod
 
     tot = 100*region_mean_lengths[idx_best_normalised_mean_length] * abs(all_mse_without_region-total_mse) / abs(all_mse_without_region[idx_best_normalised_mean_length]-total_mse)/region_mean_lengths
     ob = tot - tot * abs(all_mse_without_region_intra-total_mse) / (abs(all_mse_without_region_intra-total_mse)+abs(all_mse_without_region_ob-total_mse))
-    plot_region_importance(tot, ob, type_of_antigen, mode)
+    plot_region_importance(tot, ob, type_of_antigen, mode, interactive=interactive)
 
-def compute_residue_importance(preprocessed_data, model, type_of_antigen, nanobodies):
+def compute_residue_importance(preprocessed_data, model, type_of_antigen, nanobodies, interactive=False):
 
     colours = get_colours_ag_type(preprocessed_data)
     each_img_enl = get_output_representations(preprocessed_data, model)
@@ -610,4 +607,4 @@ def compute_residue_importance(preprocessed_data, model, type_of_antigen, nanobo
     total_mse = all_mse_without_region[-1]
     all_mse_without_region.pop(-1)
 
-    plot_residue_importance(preprocessed_data, 100*abs(all_mse_without_region-total_mse)/abs(max(all_mse_without_region)-total_mse), type_of_antigen)
+    plot_residue_importance(preprocessed_data, 100*abs(all_mse_without_region-total_mse)/abs(max(all_mse_without_region)-total_mse), type_of_antigen, interactive=interactive)

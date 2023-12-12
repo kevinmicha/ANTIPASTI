@@ -46,8 +46,6 @@ class Preprocessing(object):
         Compute all the normal mode correlation maps.
     renew_residues: bool
         Retrieve the lists of residues for each entry.
-    mode: str
-        Choose between ``fully-cropped`` and ``fully-extended``.
     stage: str
         Choose between ``training`` and ``predicting``.
     test_data_path: str
@@ -88,7 +86,6 @@ class Preprocessing(object):
             cmaps_thr=8.0,
             ag_agnostic=False,
             affinity_entries_only=True,
-            mode='fully-extended',
             stage='training',
             test_data_path=None,
             test_dccm_map_path=None,
@@ -114,7 +111,6 @@ class Preprocessing(object):
         self.cmaps_thr = cmaps_thr
         self.ag_agnostic = ag_agnostic
         self.affinity_entries_only = affinity_entries_only
-        self.mode = mode
         self.stage = 'training'
         self.file_residues_paths = sorted(glob.glob(os.path.join(self.residues_path, '*.npy')))
         self.alphafold = alphafold
@@ -219,8 +215,8 @@ class Preprocessing(object):
                 l_chain = 'B'
                 antigen_chains = ['C', 'D', 'E']
                 idx_list = [0]
-                h_range = range(2-self.h_offset, hupsymchain-self.h_offset)
-                l_range = range(2-self.l_offset, lupsymchain-self.l_offset)
+                h_range = range(1-self.h_offset, hupsymchain-self.h_offset)
+                l_range = range(1-self.l_offset, lupsymchain-self.l_offset)
                 h_pos = start_chain
                 l_pos = start_chain
 
@@ -502,23 +498,13 @@ class Preprocessing(object):
         current_list_l = f_res[h+1:h+l+1]
         current_list_l = [x[1:].strip() for x in current_list_l]    
 
-        if self.mode == 'fully-cropped':
-            idx_list = [i for i in range(len(current_list_h)) if current_list_h[i] in self.min_res_list_h]
-            idx_list += [i+len(current_list_h) for i in range(len(current_list_l)) if current_list_l[i] in self.min_res_list_l]
-
-            masked = img[idx_list,:][:,idx_list] 
-
-        elif self.mode == 'fully-extended':
-            idx_list = [i for i in range(max_res_h) if self.max_res_list_h[i] in current_list_h]
-            idx_list += [i+max_res_h for i in range(max_res_l) if self.max_res_list_l[i] in current_list_l]
-            #idx_list += [i+max_res_h+max_res_l for i in range(min(antigen_max_pixels, img.shape[-1]-(h+l)))]
-            for k, i in enumerate(idx_list):
-                for l, j in enumerate(idx_list):
-                    masked[i, j] = img[k, l]
-                    mask[i, j] = 1
-
-        else:
-            raise NotImplementedError('Unknown mode: choose between fully-cropped and fully-extended')
+        idx_list = [i for i in range(max_res_h) if self.max_res_list_h[i] in current_list_h]
+        idx_list += [i+max_res_h for i in range(max_res_l) if self.max_res_list_l[i] in current_list_l]
+        idx_list += [i+max_res_h+max_res_l for i in range(min(antigen_max_pixels, img.shape[-1]-(h+l)))]
+        for k, i in enumerate(idx_list):
+            for l, j in enumerate(idx_list):
+                masked[i, j] = img[k, l]
+                mask[i, j] = 1
             
         return masked, mask
 
@@ -563,8 +549,8 @@ class Preprocessing(object):
             h, l, _ = self.get_lists_of_lengths(selected_entries=str(pdb_id[:-3]).split())
             h = h[0] 
             l = l[0] 
-            hupsymchain = 2 + h 
-            lupsymchain = 2 + l 
+            hupsymchain = 1 + h 
+            lupsymchain = 1 + l 
             lresidues = False
         else:
             hupsymchain = None
