@@ -139,7 +139,7 @@ man_pages = [
 #  dir menu entry, description, category)
 texinfo_documents = [
     (master_doc, 'ANTIPASTI', u'ANTIPASTI Documentation',
-     author, 'ANTIPASTI', 'Deep Learning model that predicts the binding affinity of antibodies from their sequence and three-dimensional structure.',
+     author, 'ANTIPASTI', 'Deep Learning model that predicts the binding affinity of antibodies from their three-dimensional structure.',
      'Miscellaneous'),
 ]
 

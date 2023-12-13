@@ -18,7 +18,7 @@ setup(
     version='1.0',
     author='Kevin Michalewicz',
     author_email='k.michalewicz22@imperial.ac.uk',
-    description='Deep Learning model that predicts the binding affinity of antibodies from their sequence and three-dimensional structure.',
+    description='Deep Learning model that predicts the binding affinity of antibodies from their three-dimensional structure.',
     packages=['antipasti', 'antipasti.model', 'antipasti.preprocessing', 'antipasti.utils'],
     install_requires=['adabelief-pytorch', 'biopython', 'matplotlib', 'numpy', 'opencv-python', 'optuna', 'pandas', 'requests', 'scikit-learn', 'scipy', 'torch', 'torchmetrics', 'umap-learn'],
     cmdclass={'test': PyTest}
