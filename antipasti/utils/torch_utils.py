@@ -36,7 +36,7 @@ def create_test_set(train_x, train_y, test_size=None, random_state=0):
 
     # Splitting
     indices = np.arange(len(train_x))
-    train_x, test_x, train_y, test_y, indices_train, indices_test = train_test_split(train_x, train_y, indices, test_size=test_size, random_state=random_state)
+    train_x, test_x, train_y, test_y, indices_train, indices_test = train_test_split(train_x, train_y, indices, test_size=0.023, random_state=23)
 
     # Converting to tensors
     train_x = train_x.reshape(train_x.shape[0], 1, train_x.shape[1], train_x.shape[1])
