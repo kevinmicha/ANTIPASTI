@@ -5,10 +5,20 @@
 [![Tests](https://github.com/kevinmicha/ANTIPASTI/actions/workflows/tests.yml/badge.svg)](https://github.com/kevinmicha/ANTIPASTI/actions/workflows/tests.yml)
 [![Docs](https://github.com/kevinmicha/ANTIPASTI/actions/workflows/documentation.yml/badge.svg)](https://kevinmicha.github.io/ANTIPASTI/index.html)
 [![Coverage](https://codecov.io/gh/kevinmicha/ANTIPASTI/branch/main/graph/badge.svg?token=GJCV2H7L1J)](https://codecov.io/gh/kevinmicha/ANTIPASTI)
+[![PyPI](https://img.shields.io/pypi/v/antipasti)](https://pypi.org/project/ANTIPASTI/)
 
 ANTIPASTI (ANTIbody Predictor of Affinity from STructural Information) is a Python Deep Learning method that predicts the binding affinity of antibodies from their three-dimensional structure.
 
 ## Installation 
+
+### Through PyPI
+
+ANTIPASTI releases are distributed through the Python Package Index (PyPI). To install the latest version use `pip`:
+
+```bash
+$ pip install antipasti
+```
+
 ### Through Anaconda
 We provide an Anaconda environment that satisfies all the dependencies in `antipasti-env.yml`. 
 ```bash

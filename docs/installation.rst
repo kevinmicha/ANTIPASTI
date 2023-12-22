@@ -9,6 +9,16 @@ ANTIPASTI is developed using Python 3.8, 3.9, 3.10 and 3.11 and might be fine wi
 
 It requires ``adabelief-pytorch``, ``biopython``, ``matplotlib``, ``numpy``, ``opencv-python``, ``optuna``, ``pandas``, ``scikit-learn``, ``scipy``, ``torch``, and ``torchmetrics`` to work properly. 
 
+Through PyPI
+------------
+
+ANTIPASTI releases are distributed through the Python Package Index (PyPI). To install the latest version use ``pip``:
+
+::
+
+    $ pip install antipasti
+
+   
 Through Anaconda 
 ----------------
 
