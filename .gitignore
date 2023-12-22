@@ -179,3 +179,7 @@ notebooks/explainability_raw.ipynb
 # Scripts
 scripts/measure_all_distances.py
 
+# Under construction
+scripts/evaluation.py
+scripts/training.py
+
