@@ -1,4 +1,4 @@
-# Predicting and explaining antibody binding affinity with Deep Learning and Normal Mode Analysis
+# ANTIPASTI: interpretable prediction of antibody binding affinity exploiting residue-level Elastic Network representations and Deep Learning
 
 [![Python 3.8 - 3.11](https://img.shields.io/badge/Python-3.8%20--%203.11-blue)](https://www.python.org/downloads/release/python-3113/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green)](https://opensource.org/license/mit/)
