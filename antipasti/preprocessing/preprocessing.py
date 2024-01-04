@@ -167,7 +167,7 @@ class Preprocessing(object):
         return list(df['pdb']), list(df['affinity']), df
 
     def generate_fv_pdb(self, path, keepABC=True, lresidues=False, hupsymchain=None, lupsymchain=None):
-        r"""Generates a new PDB file going from the beginning of the CDR1 until the end of the CDR3.
+        r"""Generates a new PDB file containing the antigen residues and the antibody variable region.
 
         Parameters
         ----------
@@ -318,7 +318,7 @@ class Preprocessing(object):
                 f_new.writelines([content[l] for l in range(len(content)) if content[l][0:6] == 'HETATM' and content[l][chain_range] in [h_chain, l_chain] and l not in idx_list+idx_list_l+idx_list_antigen])
             
     def generate_maps(self):
-        r"""Generates the normal mode correlation maps.
+        r"""Generates the Normal Mode correlation maps.
 
         """
         for i, entry in enumerate(self.entries):
