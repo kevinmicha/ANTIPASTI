@@ -16,7 +16,7 @@ ANTIPASTI releases are distributed through the Python Package Index (PyPI). To i
 
 ::
 
-    $ pip install antipasti
+    pip install antipasti
 
    
 Through Anaconda 

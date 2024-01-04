@@ -16,7 +16,7 @@ ANTIPASTI (ANTIbody Predictor of Affinity from STructural Information) is a Pyth
 ANTIPASTI releases are distributed through the Python Package Index (PyPI). To install the latest version use `pip`:
 
 ```bash
-$ pip install antipasti
+pip install antipasti
 ```
 
 ### Through Anaconda
