@@ -159,6 +159,8 @@ checkpoints/full_ags_n_modes/100_modes/model_epochs_599_modes_100_pool_1_filters
 checkpoints/full_ags_n_modes/100_modes/model_epochs_608_modes_100_pool_1_filters_4_size_4.pt
 checkpoints/full_ags_n_modes/100_modes/model_epochs_794_modes_100_pool_2_filters_4_size_4.pt
 checkpoints/full_ags_n_modes/100_modes/model_epochs_1073_modes_100_pool_1_filters_4_size_4.pt
+checkpoints/full_ags_all_modes/model_epochs_1000_modes_all_pool_1_filters_4_size_4.pt
+checkpoints/full_ags_all_modes/learnt_filter_epochs_1000_modes_all_pool_1_filters_4_size_4.npy
 
 # Data not used
 data/contact_maps_explorer/
@@ -172,6 +174,7 @@ data/dccm_maps_full_ags_15
 data/dccm_maps_full_ags_30
 data/dccm_maps_full_ags_50
 data/dccm_maps_full_ags_250
+data/cov_maps_full_ags_all
 
 # Raw notebooks
 notebooks/explainability_raw.ipynb

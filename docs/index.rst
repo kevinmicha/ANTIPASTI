@@ -19,6 +19,7 @@ You can follow the `example notebooks <https://github.com/kevinmicha/ANTIPASTI/t
 
 If you have already read our :doc:`paper<citing>`, you might want to proceed with the :doc:`installation` or the :doc:`Tutorial <tutorial/index>`.
 
+.. warning:: Please read the ``pathological`` list in any notebook to see which complexes have been excluded (more details can be found in the ANTIPASTI paper). 
 
 Contributing
 ------------

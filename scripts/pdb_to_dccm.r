@@ -20,6 +20,7 @@ if(str_equal(args[3], "all")){
 
 pdb <- read.pdb(args[1])
 modes <- suppressMessages(suppressWarnings(quiet(nma(pdb))))
-cm <- suppressMessages(suppressWarnings(quiet(dccm(modes, nmodes=nmodes))))
+cm <- suppressMessages(suppressWarnings(quiet(cov.nma(modes))))
+#cm <- suppressMessages(suppressWarnings(quiet(dccm(modes, nmodes=nmodes))))
 b <- np$array(cm)
 np$save(args[2], b)
