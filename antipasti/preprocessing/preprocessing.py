@@ -343,7 +343,7 @@ class Preprocessing(object):
             new_path = self.dccm_map_path + entry
             self.generate_fv_pdb(self.structures_path+entry+self.file_type_input, lresidues=True) 
             if not self.cmaps: # and len(np.load(self.residues_path + path[-11:-7] + '.npy')) > 500:
-                subprocess.call(['/usr/local/bin/RScript', str(self.scripts_path)+'pdb_to_dccm.r', str(path), str(new_path), str(self.modes)], stdout=open(os.devnull, 'wb'))
+                subprocess.call(['/usr/local/bin/RScript', str(self.scripts_path)+'pdb_to_dccm.r', str(path), str(new_path), str(self.modes)], shell=True, stdout=open(os.devnull, 'wb'))
             #elif not self.cmaps:
             #    print(path[-11:-7])
             #    subprocess.call(['/usr/local/bin/RScript', str(self.scripts_path)+'pdb_to_dccm_aa.r', str(path), str(new_path), str(self.modes)], stdout=open(os.devnull, 'wb'))
