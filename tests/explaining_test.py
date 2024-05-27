@@ -57,6 +57,7 @@ class TestTraining(unittest.TestCase):
         compute_umap(preprocessed_data, model, scheme='heavy_species', categorical=True, include_ellipses=True, numerical_values=None, external_cdict=None, interactive=True, exclude_nanobodies=True)
         compute_umap(preprocessed_data, model, scheme='heavy_species', categorical=True, include_ellipses=True, numerical_values=None, external_cdict=None, interactive=True)
         compute_umap(preprocessed_data, model, scheme='light_ctype', categorical=True, include_ellipses=True, numerical_values=None, external_cdict=None, interactive=True)
+        compute_umap(preprocessed_data, model, scheme='heavy_subclass', categorical=True, include_ellipses=False, numerical_values=None, external_cdict=None, interactive=True)
         compute_umap(preprocessed_data, model, scheme='light_subclass', categorical=True, include_ellipses=False, numerical_values=None, external_cdict=None, interactive=True)
         compute_umap(preprocessed_data, model, scheme='antigen_type', categorical=True, include_ellipses=False, numerical_values=None, external_cdict=None, interactive=True)
         compute_umap(preprocessed_data, model, scheme='antigen_species', categorical=True, include_ellipses=False, numerical_values=None, external_cdict=cdict, interactive=True)

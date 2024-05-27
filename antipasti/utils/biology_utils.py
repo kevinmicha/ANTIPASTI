@@ -101,22 +101,15 @@ def get_sequence(list_of_residues, max_res_list_h=None, max_res_list_l=None):
     current_list_h = [x[2:].strip() for x in list_of_residues_h]
     current_list_l = [x[2:].strip() for x in list_of_residues_l]
 
-    if max_res_list_h is None or max_res_list_l is None:
-        sequence = [lor[0] for lor in list_of_residues[1:h+1]] # No antibody alignment
-        sequence += [':'] # Separating chains
-        if list_of_residues_l:
-            sequence += [lor[0] for lor in list_of_residues[h+1:list_of_residues.index('END-Ab')]]
-        sequence += [':'] # Separating chains
-        sequence += [lor[0] for lor in list_of_residues[list_of_residues.index('END-Ab')+1:]]
-    else:
-        list_of_residues_iterator_h = iter(list_of_residues_h)
-        list_of_residues_iterator_l = iter(list_of_residues_l)
-        sequence = [next(list_of_residues_iterator_h, '-')[0] if max_res_list_h[i] in current_list_h else '-' for i in range(len(max_res_list_h))]
-        sequence += [':'] # Separating chains
-        if list_of_residues_l:
-            sequence += [next(list_of_residues_iterator_l, '-')[0] if max_res_list_l[i] in current_list_l else '-' for i in range(len(max_res_list_l))]
-        sequence += [':'] # Separating chains
-        sequence += [lor[0] for lor in list_of_residues[list_of_residues.index('END-Ab')+1:]]
+    
+    list_of_residues_iterator_h = iter(list_of_residues_h)
+    list_of_residues_iterator_l = iter(list_of_residues_l)
+    sequence = [next(list_of_residues_iterator_h, '-')[0] if max_res_list_h[i] in current_list_h else '-' for i in range(len(max_res_list_h))]
+    sequence += [':'] # Separating chains
+    if list_of_residues_l:
+        sequence += [next(list_of_residues_iterator_l, '-')[0] if max_res_list_l[i] in current_list_l else '-' for i in range(len(max_res_list_l))]
+    sequence += [':'] # Separating chains
+    sequence += [lor[0] for lor in list_of_residues[list_of_residues.index('END-Ab')+1:]]
 
     return ''.join(map(str, sequence))
 
