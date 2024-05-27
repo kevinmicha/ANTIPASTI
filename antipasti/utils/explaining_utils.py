@@ -1,5 +1,4 @@
 import cv2
-import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -72,6 +71,14 @@ def get_output_representations(preprocessed_data, model):
     each_img_enl = np.zeros((preprocessed_data.train_x.shape[0], input_shape**2))
     size_le = int(np.sqrt(model.fc1.weight.data.numpy().shape[-1] / model.n_filters))
     offset = np.zeros((input_shape**2))
+
+    # Border effects
+    preprocessed_data.train_x[:,:,0] = 0
+    preprocessed_data.train_x[:,0,:] = 0
+    preprocessed_data.train_x[:,:,len(preprocessed_data.max_res_list_h)-1:len(preprocessed_data.max_res_list_h)+1] = 0
+    preprocessed_data.train_x[:,len(preprocessed_data.max_res_list_h)-1:len(preprocessed_data.max_res_list_h)+1, :] = 0
+    preprocessed_data.train_x[:,:,-1] = 0
+    preprocessed_data.train_x[:,-1,:] = 0
 
     inter_filter_off = model(torch.from_numpy(np.zeros((input_shape, input_shape)).reshape(1, 1, input_shape, input_shape).astype(np.float32)))[1].detach().numpy()
     for i in range(model.n_filters):
@@ -243,8 +250,12 @@ def compute_umap(preprocessed_data, model, scheme='heavy_species', categorical=T
     for j in range(train_x.shape[0]):
         if scheme in db.columns:
             labels.append(str(db[db['pdb'] == pdb_codes[j]].iloc[-1][scheme]))
+    #         if pdb_codes[j] in nanobodies:
+    #             labels.pop()
+    #             labels.append('nanobodies')
     each_img_enl = get_output_representations(preprocessed_data, model)
-
+    # each_img_enl = each_img_enl.reshape(-1, train_x.shape[-1], train_x.shape[-1])[:, :len(preprocessed_data.max_res_list_h), :len(preprocessed_data.max_res_list_h)].reshape(-1, len(preprocessed_data.max_res_list_h)**2)
+    
     # UMAP fitting 
     scaled_each_img = StandardScaler().fit_transform(each_img_enl)
     embedding = reducer.fit_transform(scaled_each_img)
@@ -302,6 +313,7 @@ def compute_umap(preprocessed_data, model, scheme='heavy_species', categorical=T
                 'Hapten': 2,
                 'protein | protein': 3,
                 'carbohydrate': 4,
+        #       'nanobodies': 5,
                 'Other': 5}
             scheme = 'Type of antigen'
         else:
@@ -327,7 +339,7 @@ def compute_umap(preprocessed_data, model, scheme='heavy_species', categorical=T
                 deleted_items += 1
     plot_umap(embedding=embedding, colours=colours, scheme=scheme, pdb_codes=pdb_codes, categorical=categorical, include_ellipses=include_ellipses, cdict=cdict, interactive=interactive)
 
-    return colours, pdb_codes
+    return colours, pdb_codes, embedding
 
 
 def plot_umap(embedding, colours, scheme, pdb_codes, categorical=True, include_ellipses=False, cdict=None, interactive=False):
@@ -357,9 +369,9 @@ def plot_umap(embedding, colours, scheme, pdb_codes, categorical=True, include_e
     ax = fig.add_subplot()
 
     if categorical:
-        cmap = matplotlib.colormaps.get_cmap('tab10')
+        cmap = plt.get_cmap('tab10')
     else:
-        cmap = matplotlib.colormaps.get_cmap('Purples')
+        cmap = plt.get_cmap('Purples')
     unique_colours = list(set(colours))
     norm = plt.Normalize(np.min(colours), np.max(colours))
     legend_patches = [patches.Patch(color=cmap(norm(color))) for color in unique_colours]
@@ -444,7 +456,7 @@ def plot_region_importance(importance_factor, importance_factor_ob, antigen_type
     mapping_dict = {0: 0, 1: 2, 2: 1, 3: 5}
 
     sorted_indices = np.argsort(importance_factor)[::-1]  # Reverse order
-    cmap = matplotlib.colormaps.get_cmap('tab10')
+    cmap = plt.get_cmap('tab10')
 
     # Create bars for each class
     fig, ax = plt.subplots()
@@ -508,7 +520,7 @@ def plot_residue_importance(preprocessed_data, importance_factor, antigen_type, 
 
     res_labels = add_region_based_on_range(preprocessed_data.max_res_list_h+preprocessed_data.max_res_list_l)
     mapping_dict = {0: 0, 1: 2, 2: 1, 3: 5}
-    cmap = matplotlib.colormaps.get_cmap('tab10')
+    cmap = plt.get_cmap('tab10')
 
     fig, ax = plt.subplots()
     y_pos = np.arange(len(res_labels[:30]))
@@ -572,7 +584,7 @@ def get_colours_ag_type(preprocessed_data):
     return colours 
 
 def compute_region_importance(preprocessed_data, model, type_of_antigen, nanobodies, mode='region', interactive=False):
-    r"""Computes the importance factors (0-100) of all the Fv antibody regions.
+    r"""Computes the importance factors (0-100) of all the Fv antibody regions. Returns the importance for each region.
 
     Parameters
     ----------
@@ -596,6 +608,8 @@ def compute_region_importance(preprocessed_data, model, type_of_antigen, nanobod
 
     train_x = preprocessed_data.train_x
     input_shape = preprocessed_data.test_x.shape[-1]
+    labels = preprocessed_data.labels
+    train_y = preprocessed_data.train_y
 
     colours = [0 if c == 5 else c for c in colours]
     all_mse_without_region = []
@@ -606,19 +620,19 @@ def compute_region_importance(preprocessed_data, model, type_of_antigen, nanobod
                         range(153, 176), range(176, 195), range(195, 210), range(210, 225), range(225, 265), range(265, 279), range(279, 292)], dtype=object)
     
     for j in range(len(new_coord)+1):
-        train_y_ = np.array([preprocessed_data.train_y[i] for i in range(train_x.shape[0]) if colours[i] == type_of_antigen and preprocessed_data.labels[i] not in nanobodies])
+        train_y_ = np.array([train_y[i] for i in range(each_img_enl.shape[0]) if colours[i] == type_of_antigen and labels[i] not in nanobodies])
         if j != len(new_coord):
             
             sums_without_region = np.array([
                 each_img_enl[i].reshape((input_shape, input_shape)).sum()-(each_img_enl[i].reshape((input_shape, input_shape))[new_coord[j][0]:new_coord[j][-1] + 1, :]).sum()
-                for i in range(train_x.shape[0]) if colours[i] == type_of_antigen and preprocessed_data.labels[i] not in nanobodies])
+                for i in range(each_img_enl.shape[0]) if colours[i] == type_of_antigen and labels[i] not in nanobodies])
 
             if mode == 'region':
                 sums_without_region_divided = np.array([
                         each_img_enl[i].reshape((input_shape, input_shape)).sum()-np.array([(each_img_enl[i].reshape((input_shape, input_shape))[new_coord[j][0]:new_coord[j][-1] + 1, new_coord[0][0]:new_coord[j][0]]).sum()
                                                                     +(each_img_enl[i].reshape((input_shape, input_shape))[new_coord[j][0]:new_coord[j][-1] + 1, new_coord[j][-1] + 1:new_coord[-1][-1] + 1]).sum(),
                                                                     (each_img_enl[i].reshape((input_shape, input_shape))[new_coord[j][0]:new_coord[j][-1] + 1, new_coord[j][0]:new_coord[j][-1] + 1]).sum()])
-                        for i in range(train_x.shape[0]) if colours[i] == type_of_antigen and preprocessed_data.labels[i] not in nanobodies])
+                        for i in range(each_img_enl.shape[0]) if colours[i] == type_of_antigen and labels[i] not in nanobodies])
 
                 all_mse_without_region_intra.append(np.mean((sums_without_region_divided[:,1] - train_y_)**2))
                 all_mse_without_region_ob.append(np.mean((sums_without_region_divided[:,0] - train_y_)**2))
@@ -627,7 +641,7 @@ def compute_region_importance(preprocessed_data, model, type_of_antigen, nanobod
                 sums_without_region_divided = np.array([
                         each_img_enl[i].reshape((input_shape, input_shape)).sum()-np.array([(each_img_enl[i].reshape((input_shape, input_shape))[new_coord[j][0]:new_coord[j][-1] + 1, :len(preprocessed_data.max_res_list_h)]).sum(),
                                                                     (each_img_enl[i].reshape((input_shape, input_shape))[new_coord[j][0]:new_coord[j][-1] + 1, len(preprocessed_data.max_res_list_h):]).sum()])
-                        for i in range(train_x.shape[0]) if colours[i] == type_of_antigen and preprocessed_data.labels[i] not in nanobodies])
+                        for i in range(each_img_enl.shape[0]) if colours[i] == type_of_antigen and labels[i] not in nanobodies])
 
                 index = 0 if j < 7 else 1
                 all_mse_without_region_intra.append(np.mean((sums_without_region_divided[:, index] - train_y_)**2))
@@ -635,7 +649,7 @@ def compute_region_importance(preprocessed_data, model, type_of_antigen, nanobod
         else:
             sums_without_region = np.array([
                     each_img_enl[i].reshape((input_shape, input_shape)).sum()
-                    for i in range(train_x.shape[0]) if colours[i] == type_of_antigen and preprocessed_data.labels[i] not in nanobodies])
+                    for i in range(each_img_enl.shape[0]) if colours[i] == type_of_antigen and labels[i] not in nanobodies])
 
         all_mse_without_region.append(np.mean((sums_without_region - train_y_)**2))
     total_mse = all_mse_without_region[-1]
@@ -647,6 +661,8 @@ def compute_region_importance(preprocessed_data, model, type_of_antigen, nanobod
     tot = 100*region_mean_lengths[idx_best_normalised_mean_length] * abs(all_mse_without_region-total_mse) / abs(all_mse_without_region[idx_best_normalised_mean_length]-total_mse)/region_mean_lengths
     ob = tot - tot * abs(all_mse_without_region_intra-total_mse) / (abs(all_mse_without_region_intra-total_mse)+abs(all_mse_without_region_ob-total_mse))
     plot_region_importance(tot, ob, type_of_antigen, mode, interactive=interactive)
+
+    return tot, ob
 
 def compute_residue_importance(preprocessed_data, model, type_of_antigen, nanobodies, interactive=False):
     r"""Computes the importance factors (0-100) of all the amino acids of the antibody variable region.

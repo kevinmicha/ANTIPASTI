@@ -35,7 +35,7 @@ class TestTraining(unittest.TestCase):
             'Other': 2}
         
         # Pre-processing
-        preprocessed_data = Preprocessing(data_path='data/', dccm_map_path=self.dccm_map_path, modes=self.modes, pathological=self.pathological, stage=self.stage, test_data_path=self.test_data_path, test_dccm_map_path=self.test_dccm_map_path, test_residues_path=self.test_residues_path, test_structure_path=self.test_structure_path, test_pdb_id='4yhi', residues_path='lists_of_residues_explainability/', renew_residues=True)
+        preprocessed_data = Preprocessing(data_path='data/', dccm_map_path=self.dccm_map_path, modes=self.modes, pathological=self.pathological, stage=self.stage, test_data_path=self.test_data_path, test_dccm_map_path=self.test_dccm_map_path, test_residues_path=self.test_residues_path, test_structure_path=self.test_structure_path, test_pdb_id='4yhi', residues_path='lists_of_residues/', renew_residues=True)
         input_shape = preprocessed_data.test_x.shape[-1]
 
         # Loading the actual checkpoint and learnt filters

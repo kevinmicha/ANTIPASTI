@@ -22,11 +22,11 @@ class TestTraining(unittest.TestCase):
     
     def test_training_paired_hl(self):
         preprocessed_data = Preprocessing(data_path='data/', dccm_map_path='dccm_maps_full_ags_all/', pathological=self.pathological, renew_residues=True)
-        train_x, test_x, train_y, test_y, _, _ = create_test_set(preprocessed_data.train_x, preprocessed_data.train_y)
+        train_x, test_x, train_y, test_y, idx_tr, idx_te = create_test_set(preprocessed_data, test_size=0.05, residues_path='data/lists_of_residues/')
 
         # Small training set
         preprocessed_data = Preprocessing(data_path=self.data_path, structures_path=self.structures_path, scripts_path=self.scripts_path, df=self.df, pathological=self.pathological)
-        train_x, test_x, train_y, test_y, _, _ = create_test_set(preprocessed_data.train_x, preprocessed_data.train_y, test_size=0.5)
+        train_x, test_x, train_y, test_y, _, _ = create_test_set(preprocessed_data, test_size=0.5, residues_path=self.path+'/data/lists_of_residues/')
 
         n_filters = 2
         filter_size = 4

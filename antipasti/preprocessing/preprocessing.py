@@ -183,11 +183,17 @@ class Preprocessing(object):
             Upper limit of light chain residues due to a change in the numbering convention. Only useful when using ``AlphaFold``.
 
         """
+
+        amino_acid_dictionary = {'CYS': 'C', 'ASP': 'D', 'SER': 'S', 'GLN': 'Q', 'LYS': 'K',
+        'ILE': 'I', 'PRO': 'P', 'THR': 'T', 'PHE': 'F', 'ASN': 'N', 'GLY': 'G', 'HIS': 'H', 
+        'LEU': 'L', 'ARG': 'R', 'TRP': 'W', 'ALA': 'A', 'VAL':'V', 'GLU': 'E', 'TYR': 'Y', 'MET': 'M'}
+
+
         if self.stage == 'training':
             rpath = self.residues_path
         else:
             rpath = self.test_residues_path
-        list_residues = ['START']
+        list_residues = ['START-Ab']
 
         with open(path, 'r') as f: # needs to be Chothia-numbered
             content = f.readlines()
@@ -195,6 +201,7 @@ class Preprocessing(object):
             header_lines = [content[i][0]=='R' for i in range(len(content))].count(True)
             h_range = range(1, 114)
             l_range = range(1, 108)
+            residue_type_range = slice(17, 20)
             start_chain = 21
             chain_range = slice(start_chain, start_chain+1)
             res_range = slice(23, 26)
@@ -272,6 +279,7 @@ class Preprocessing(object):
                                 full_res = new_hchain + full_res
                             else:
                                 full_res = line[chain_range] + full_res
+                            full_res = amino_acid_dictionary[line[residue_type_range]] + full_res
                             if full_res != list_residues[-1]:
                                 list_residues.append(full_res)
 
@@ -287,17 +295,25 @@ class Preprocessing(object):
                                     full_res = new_lchain + full_res
                                 else:
                                     full_res = line[chain_range] + full_res
+                                full_res = amino_acid_dictionary[line[residue_type_range]] + full_res
                                 if full_res != list_residues[-1]:
                                     list_residues.append(full_res)                   
         
+            if lresidues == True:
+                list_residues.append('END-Ab')
+
             # Obtaining antigen(s)
             for i, line in enumerate(content[header_lines:]):
                 if any(line[chain_range] in agc for agc in antigen_chains) and h_chain not in antigen_chains and l_chain not in antigen_chains:
                     idx_list_antigen.append(i+header_lines)
+                    if lresidues == True:
+                        full_res = line[chain_range] + line[res_range] + line[res_extra_letter]
+                        if line[residue_type_range] in amino_acid_dictionary:
+                            full_res = amino_acid_dictionary[line[residue_type_range]] + full_res
+                            if full_res != list_residues[-1]:
+                                list_residues.append(full_res)    
 
         # List with name of every residue is saved if selected
-        if lresidues == True:
-            list_residues.append('END')
             saving_path = rpath + path[-8:-4] + '.npy'
             #if not os.path.exists(saving_path):
             np.save(saving_path, list_residues)
@@ -326,8 +342,12 @@ class Preprocessing(object):
             path = self.structures_path + file_name + self.file_type_input
             new_path = self.dccm_map_path + entry
             self.generate_fv_pdb(self.structures_path+entry+self.file_type_input, lresidues=True) 
-            if not self.cmaps:
-                subprocess.call(['/usr/local/bin/RScript', str(self.scripts_path)+'pdb_to_dccm.r', str(path), str(new_path), str(self.modes)], shell=True, stdout=open(os.devnull, 'wb'))
+            if not self.cmaps and len(np.load(self.residues_path + path[-11:-7] + '.npy')) > 500:
+                print(len(np.load(self.residues_path + path[-11:-7] + '.npy')))
+                subprocess.call(['/usr/local/bin/RScript', str(self.scripts_path)+'pdb_to_dccm.r', str(path), str(new_path), str(self.modes)], stdout=open(os.devnull, 'wb'))
+            elif not self.cmaps:
+                print(path[-11:-7])
+                subprocess.call(['/usr/local/bin/RScript', str(self.scripts_path)+'pdb_to_dccm_aa.r', str(path), str(new_path), str(self.modes)], stdout=open(os.devnull, 'wb'))
             else:
                 subprocess.call(['python', str(self.scripts_path)+'generate_contact_maps.py', str(path), str(new_path), str(self.cmaps_thr)], stdout=open(os.devnull, 'wb'))
             if os.path.exists(path):
@@ -363,13 +383,20 @@ class Preprocessing(object):
             rpath = self.test_residues_path
 
         for entry in selected_entries:
-            list_of_residues = np.load(rpath+entry+'.npy')[1:-1]
-            h_chain = list_of_residues[0][0]
-            l_chain = list_of_residues[-1][0]
+            list_of_residues = list(np.load(rpath+entry+'.npy'))[1:]
+            chain_pos = 0
+            if 'END-Ab' in list_of_residues:
+                list_of_residues = list_of_residues[:list_of_residues.index('END-Ab')]
+                chain_pos = 1
+            else:
+                list_of_residues = list_of_residues[:-1]
 
-            heavy.append(len([idx for idx in list_of_residues if idx[0] == h_chain]))
+            h_chain = list_of_residues[0][chain_pos]
+            l_chain = list_of_residues[-1][chain_pos]
+
+            heavy.append(len([idx for idx in list_of_residues if idx[chain_pos] == h_chain]))
             if h_chain != l_chain:
-                light.append(len([idx for idx in list_of_residues if idx[0] == l_chain]))
+                light.append(len([idx for idx in list_of_residues if idx[chain_pos] == l_chain]))
             else:
                 light.append(0)
 
@@ -383,11 +410,14 @@ class Preprocessing(object):
         max_res_list_l = []
 
         for f in self.file_residues_paths:
+            shift = 0
+            if 'END-Ab' in np.load(f):
+                shift = 1
             idx = self.selected_entries.index(f[-8:-4])
             current_list_h = np.load(f)[1:self.heavy[idx]+1]
             current_list_l = np.load(f)[self.heavy[idx]+1:self.heavy[idx]+self.light[idx]+1]
-            current_list_h = [x[1:] for x in current_list_h]
-            current_list_l = [x[1:] for x in current_list_l]
+            current_list_h = [x[1+shift:] for x in current_list_h]
+            current_list_l = [x[1+shift:] for x in current_list_l]
             max_res_list_h += list(set(current_list_h).difference(max_res_list_h))
             max_res_list_l += list(set(current_list_l).difference(max_res_list_l))
             
@@ -400,11 +430,14 @@ class Preprocessing(object):
         max_res_list_l = [x.strip() for x in max_res_list_l]
 
         for f in self.file_residues_paths:
+            shift = 0
+            if 'END-Ab' in f:
+                shift = 1
             idx = self.selected_entries.index(f[-8:-4])
             current_list_h = np.load(f)[1:self.heavy[idx]+1]
             current_list_l = np.load(f)[self.heavy[idx]+1:self.heavy[idx]+self.light[idx]+1]
-            current_list_h = [x[1:] for x in current_list_h]
-            current_list_l = [x[1:] for x in current_list_l]
+            current_list_h = [x[1+shift:] for x in current_list_h]
+            current_list_l = [x[1+shift:] for x in current_list_l]
             min_res_list_h = sorted(list(set(current_list_h).intersection(min_res_list_h)))
             min_res_list_l = sorted(list(set(current_list_l).intersection(min_res_list_l)))
 
@@ -453,7 +486,9 @@ class Preprocessing(object):
         assert list(np.load(self.chain_lengths_path+'selected_entries.npy')) == selected_entries
 
         for entry in selected_entries:
-            assert len(np.load(self.residues_path+entry+'.npy'))-2 == heavy[selected_entries.index(entry)] + light[selected_entries.index(entry)]
+            residues = list(np.load(self.residues_path+entry+'.npy'))
+            if 'END-Ab' in residues:
+                assert len(residues[:residues.index('END-Ab')])-1 == heavy[selected_entries.index(entry)] + light[selected_entries.index(entry)]
 
         return heavy, light, selected_entries
 
@@ -487,6 +522,10 @@ class Preprocessing(object):
             f = sorted(glob.glob(os.path.join(self.test_residues_path, '*'+self.test_pdb_id[:-3]+'.npy')))[0] # removing '_af' suffix
         antigen_max_pixels = self.ag_residues
         f_res = np.load(f)
+
+        # We force unique elements
+        self.max_res_list_h = list(dict.fromkeys(self.max_res_list_h))
+        self.max_res_list_l = list(dict.fromkeys(self.max_res_list_l))
         max_res_h = len(self.max_res_list_h)
         max_res_l = len(self.max_res_list_l)
         max_res = max_res_h + max_res_l 
@@ -502,9 +541,10 @@ class Preprocessing(object):
             l = self.light[current_idx]
 
         current_list_h = f_res[1:h+1]
-        current_list_h = [x[1:].strip() for x in current_list_h]
+        shift = len(f_res[1][:f_res[1].find(' ')])
+        current_list_h = [x[shift:].strip() for x in current_list_h] # First letter is the type of amino acid and second letter is the chain ID
         current_list_l = f_res[h+1:h+l+1]
-        current_list_l = [x[1:].strip() for x in current_list_l]    
+        current_list_l = [x[shift:].strip() for x in current_list_l]    
 
         idx_list = [i for i in range(max_res_h) if self.max_res_list_h[i] in current_list_h]
         idx_list += [i+max_res_h for i in range(max_res_l) if self.max_res_list_l[i] in current_list_l]

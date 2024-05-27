@@ -1,26 +1,29 @@
 import numpy as np
 import torch
+import os
 
 from adabelief_pytorch import AdaBelief
 from sklearn.model_selection import train_test_split
 from torch.autograd import Variable
 
 from antipasti.model.model import ANTIPASTI
+from antipasti.utils.biology_utils import check_train_test_identity 
+from config import DATA_DIR
 
-def create_test_set(train_x, train_y, test_size=None, random_state=0):
+def create_test_set(preprocessed_data, test_size=None, random_state=0, residues_path=DATA_DIR+'lists_of_residues/'):
     r"""Creates the test set given a set of input images and their corresponding labels.
 
     Parameters
     ----------
-    train_x: numpy.ndarray
-        Input normal mode correlation maps.
-    train_y: numpy.ndarray
-        Labels.
+    preprocessed_data: antipasti.preprocessing.Preprocessed
+        An instance of the Preprocessed class.
     test_size: float
         Fraction of original samples to be included in the test set.
     random_state: int
         Set lot number.
-
+    residues_path: str
+        Path to the folder containing the list of residues per entry.
+        
     Returns
     -------
     train_x: torch.Tensor
@@ -35,8 +38,34 @@ def create_test_set(train_x, train_y, test_size=None, random_state=0):
     """
 
     # Splitting
-    indices = np.arange(len(train_x))
-    train_x, test_x, train_y, test_y, indices_train, indices_test = train_test_split(train_x, train_y, indices, test_size=0.023, random_state=23)
+    indices_train = list(np.arange(len(preprocessed_data.train_x)))
+    #train_x, test_x, train_y, test_y, indices_train, indices_test = train_test_split(preprocessed_data.train_x, preprocessed_data.train_y, indices, test_size=0.023, random_state=random_state)
+    indices_test = []
+
+    np.random.seed(random_state)
+    random_order = indices_train.copy()
+    np.random.shuffle(random_order)
+
+    for i in range(int(len(indices_train)*test_size)):
+        test_idx = random_order[i]
+        indices_train.remove(test_idx)
+
+        if isinstance(preprocessed_data.labels[test_idx], str): # Check if first added
+            test_instance = [preprocessed_data.labels[test_idx]]
+        else:
+            test_instance = list(np.array(preprocessed_data.labels)[test_idx])
+
+        if check_train_test_identity(list(np.array(preprocessed_data.labels)[indices_train]), test_instance, preprocessed_data.max_res_list_h, preprocessed_data.max_res_list_l, threshold=0.9, residues_path=residues_path):
+            indices_test.append(test_idx)
+        else:
+            i -= 1
+            indices_train.append(test_idx)
+
+    
+    train_x = preprocessed_data.train_x[indices_train]
+    test_x = preprocessed_data.train_x[indices_test]
+    train_y = preprocessed_data.train_y[indices_train]
+    test_y = preprocessed_data.train_y[indices_test]
 
     # Converting to tensors
     train_x = train_x.reshape(train_x.shape[0], 1, train_x.shape[1], train_x.shape[1])
@@ -112,7 +141,8 @@ def training_step(model, criterion, optimiser, train_x, test_x, train_y, test_y,
     for i in range(0, x_train.size()[0], batch_size):
         indices = permutation[i:i+batch_size]
         batch_x, batch_y = x_train[indices], y_train[indices]
-        
+        #batch_weights = weights[indices]
+
         # Training output
         output_train, inter_filters = model(batch_x)
         
@@ -123,7 +153,11 @@ def training_step(model, criterion, optimiser, train_x, test_x, train_y, test_y,
         # Training loss, clearing gradients and updating weights
         optimiser.zero_grad()
         l1_loss = model.l1_regularization_loss()
-        mse_loss = criterion(output_train[:, 0], batch_y[:, 0])
+
+        # Compute the mean of the weighted squared differences
+        mse_loss = torch.mean((output_train[:, 0] - batch_y[:, 0])**2)
+
+        #mse_loss = criterion(output_train[:, 0], batch_y[:, 0])
         loss_train = mse_loss + l1_loss
         if verbose:
             print(l1_loss)
