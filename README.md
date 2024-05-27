@@ -75,7 +75,7 @@ Example notebooks are located in the [notebooks](https://github.com/kevinmicha/A
 * [[Tutorial] Explaining binding affinity with ANTIPASTI](https://github.com/kevinmicha/ANTIPASTI/blob/main/notebooks/%5BTutorial%5D%20Explaining%20binding%20affinity%20with%20ANTIPASTI.ipynb)
 * [[Tutorial] Combining AlphaFold and ANTIPASTI](https://github.com/kevinmicha/ANTIPASTI/blob/main/notebooks/%5BTutorial%5D%20Combining%20AlphaFold%20and%20ANTIPASTI.ipynb)
 
-You can download normal mode correlation maps computed at atomistic scale (instead of residue scale) [here](https://drive.google.com/drive/folders/1E8-GwQq9GHBE0A6r2t8dblAzP7qf0seQ?usp=sharing) and place it in `data/dccm_maps_full_ags_all_aa`.
+You can download normal mode correlation maps computed at atomistic scale (instead of residue scale) [here](https://drive.google.com/drive/folders/1E8-GwQq9GHBE0A6r2t8dblAzP7qf0seQ?usp=sharing) and place them in `data/dccm_maps_full_ags_all_aa`.
 
 ## Attribution
 
