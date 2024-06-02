@@ -19,11 +19,11 @@ autodoc_mock_imports = ['adabelief_pytorch', 'bs4', 'cv2', 'matplotlib', 'numpy'
 # -- Project information -----------------------------------------------------
 
 project = u'ANTIPASTI'
-copyright = u'2023, Kevin Michalewicz et al'
+copyright = u'2024, Kevin Michalewicz et al'
 author = u'Kevin Michalewicz, Mauricio Barahona, Barbara Bravi'
 
 # The full version, including alpha/beta/rc tags
-release = u'1.0'
+release = u'1.2'
 
 
 # -- General configuration ---------------------------------------------------
