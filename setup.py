@@ -21,7 +21,7 @@ except(IOError, ImportError):
 
 setup(
     name='ANTIPASTI',
-    version='1.1',
+    version='1.2',
     author='Kevin Michalewicz',
     author_email='k.michalewicz22@imperial.ac.uk',
     description='Deep Learning model that predicts the binding affinity of antibodies from their three-dimensional structure.',
