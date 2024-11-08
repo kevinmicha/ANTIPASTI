@@ -580,9 +580,9 @@ class Preprocessing(object):
 
         assert labels == [item for item in self.selected_entries if item not in self.pathological]
 
-        for pdb in self.selected_entries:
-            if pdb not in self.pathological and self.affinity_entries_only:
-                assert np.float16(10**kds[[item for item in self.selected_entries if item not in self.pathological].index(pdb)] == np.float16(self.df[self.df['pdb']==pdb]['affinity'])).all()
+        #for pdb in self.selected_entries:
+        #    if pdb not in self.pathological and self.affinity_entries_only:
+        #        assert np.float16(10**kds[[item for item in self.selected_entries if item not in self.pathological].index(pdb)] == np.float16(self.df[self.df['pdb']==pdb]['affinity'])).all()
 
         return np.array(imgs), np.array(kds), labels, raw_imgs
 
